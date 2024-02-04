@@ -2,13 +2,23 @@ import { Inter } from 'next/font/google'
 
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
+import { Metadata } from 'next'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-    title: 'Nextjs 14, TailwindCss Template',
-    description:
-        'A template for frontend developers created By Chirag Bhalotia',
+export const metadata: Metadata = {
+    title: "Chirag's Projects",
+    description: 'Projects made by Chirag Bhalotia',
+    authors: [
+        {
+            name: 'Chirag Bhalotia',
+            url: 'https://chirag.codes',
+        },
+        {
+            name: 'Chirag Bhalotia',
+            url: 'https://github.com/chirag3003',
+        },
+    ],
 }
 
 interface RootLayoutProps {
