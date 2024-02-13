@@ -18,193 +18,30 @@ import { Link } from 'react-feather'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '../ui/button'
 import { ArrowTopRightIcon } from '@radix-ui/react-icons'
+import WebsiteCard from '../Cards/WebsiteCard'
 
 interface ProjectsSectionProps {
     title: string
+    projects: IWebsiteCard[]
 }
 
-function ProjectsSection({title}: ProjectsSectionProps) {
+function ProjectsSection({ title, projects }: ProjectsSectionProps) {
     return (
         <section className="md:min-h-screen bg-background lg:p-24 lg:pt-32 px-5 py-10">
             <h1 className="font-bold text-4xl mb-12">{title}</h1>
             <div className="projects px-10">
                 <Carousel>
                     <CarouselContent>
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card Title</CardTitle>
-                                    <CardDescription>
-                                        Card Description
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="w-full bg-white/10 aspect-video rounded-xl overflow-hidden"></div>
-                                    <p className="mt-5 mb-3">Tech Stack</p>
-                                    <div className="tech-stacks flex flex-wrap">
-                                        <div className="tech-stack p-2 px-4 rounded-lg bg-secondary text-secondary-foreground">
-                                            JS
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-end">
-                                    <Link
-                                        href={''}
-                                        className={cn(
-                                            buttonVariants(),
-                                            'font-semibold'
-                                        )}
-                                    >
-                                        Visit Site{' '}
-                                        <ArrowTopRightIcon
-                                            className="ml-5"
-                                            height={18}
-                                            width={18}
-                                        />
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card Title</CardTitle>
-                                    <CardDescription>
-                                        Card Description
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="w-full bg-white/10 aspect-video rounded-xl overflow-hidden"></div>
-                                    <p className="mt-5 mb-3">Tech Stack</p>
-                                    <div className="tech-stacks flex flex-wrap">
-                                        <div className="tech-stack p-2 px-4 rounded-lg bg-secondary text-secondary-foreground">
-                                            JS
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-end">
-                                    <Link
-                                        href={''}
-                                        className={cn(
-                                            buttonVariants(),
-                                            'font-semibold'
-                                        )}
-                                    >
-                                        Visit Site{' '}
-                                        <ArrowTopRightIcon
-                                            className="ml-5"
-                                            height={18}
-                                            width={18}
-                                        />
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card Title</CardTitle>
-                                    <CardDescription>
-                                        Card Description
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="w-full bg-white/10 aspect-video rounded-xl overflow-hidden"></div>
-                                    <p className="mt-5 mb-3">Tech Stack</p>
-                                    <div className="tech-stacks flex flex-wrap">
-                                        <div className="tech-stack p-2 px-4 rounded-lg bg-secondary text-secondary-foreground">
-                                            JS
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-end">
-                                    <Link
-                                        href={''}
-                                        className={cn(
-                                            buttonVariants(),
-                                            'font-semibold'
-                                        )}
-                                    >
-                                        Visit Site{' '}
-                                        <ArrowTopRightIcon
-                                            className="ml-5"
-                                            height={18}
-                                            width={18}
-                                        />
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card Title</CardTitle>
-                                    <CardDescription>
-                                        Card Description
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="w-full bg-white/10 aspect-video rounded-xl overflow-hidden"></div>
-                                    <p className="mt-5 mb-3">Tech Stack</p>
-                                    <div className="tech-stacks flex flex-wrap">
-                                        <div className="tech-stack p-2 px-4 rounded-lg bg-secondary text-secondary-foreground">
-                                            JS
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-end">
-                                    <Link
-                                        href={''}
-                                        className={cn(
-                                            buttonVariants(),
-                                            'font-semibold'
-                                        )}
-                                    >
-                                        Visit Site{' '}
-                                        <ArrowTopRightIcon
-                                            className="ml-5"
-                                            height={18}
-                                            width={18}
-                                        />
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
-                        <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Card Title</CardTitle>
-                                    <CardDescription>
-                                        Card Description
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="w-full bg-white/10 aspect-video rounded-xl overflow-hidden"></div>
-                                    <p className="mt-5 mb-3">Tech Stack</p>
-                                    <div className="tech-stacks flex flex-wrap">
-                                        <div className="tech-stack p-2 px-4 rounded-lg bg-secondary text-secondary-foreground">
-                                            JS
-                                        </div>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex items-center justify-end">
-                                    <Link
-                                        href={''}
-                                        className={cn(
-                                            buttonVariants(),
-                                            'font-semibold'
-                                        )}
-                                    >
-                                        Visit Site{' '}
-                                        <ArrowTopRightIcon
-                                            className="ml-5"
-                                            height={18}
-                                            width={18}
-                                        />
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </CarouselItem>
+                        {projects.map((project, index) => {
+                            return (
+                                <CarouselItem
+                                    key={index}
+                                    className="md:basis-1/2 lg:basis-1/3"
+                                >
+                                    <WebsiteCard {...project} />
+                                </CarouselItem>
+                            )
+                        })}
                     </CarouselContent>
                     <CarouselPrevious />
                     <CarouselNext />

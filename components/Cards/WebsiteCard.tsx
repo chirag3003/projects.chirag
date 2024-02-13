@@ -15,6 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from '../ui/card'
+import { GitHub } from 'react-feather'
 
 function WebsiteCard({
     title,
@@ -41,7 +42,7 @@ function WebsiteCard({
                     }}
                 ></div>
                 <p className="mt-5 mb-3">Tech Stack</p>
-                <div className="tech-stacks flex flex-wrap">
+                <div className="tech-stacks flex flex-wrap gap-2">
                     {techStack.map((item, index) => (
                         <div
                             key={index}
@@ -52,7 +53,7 @@ function WebsiteCard({
                     ))}
                 </div>
             </CardContent>
-            <CardFooter className="flex items-center justify-end">
+            <CardFooter className="flex items-center justify-end gap-2">
                 {github && (
                     <Link
                         href={github}
@@ -66,7 +67,7 @@ function WebsiteCard({
                         target="_blank"
                         referrerPolicy="no-referrer"
                     >
-                        <GitHubLogoIcon height={18} width={18} />
+                        <GitHub height={25} width={25} />
                     </Link>
                 )}
                 {code && (
