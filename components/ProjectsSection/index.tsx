@@ -19,10 +19,14 @@ import { cn } from '@/lib/utils'
 import { buttonVariants } from '../ui/button'
 import { ArrowTopRightIcon } from '@radix-ui/react-icons'
 
-function ProjectsSection() {
+interface ProjectsSectionProps {
+    title: string
+}
+
+function ProjectsSection({title}: ProjectsSectionProps) {
     return (
-        <section className="min-h-screen bg-background p-24 pt-32">
-            <h1 className="font-bold text-4xl mb-12">My Projects</h1>
+        <section className="md:min-h-screen bg-background lg:p-24 lg:pt-32 px-5 py-10">
+            <h1 className="font-bold text-4xl mb-12">{title}</h1>
             <div className="projects px-10">
                 <Carousel>
                     <CarouselContent>
