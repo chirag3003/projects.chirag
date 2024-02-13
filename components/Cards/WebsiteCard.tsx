@@ -16,16 +16,6 @@ import {
     CardTitle,
 } from '../ui/card'
 
-interface WebsiteCardProps {
-    title: string
-    description: string
-    techStack: string[]
-    image: string
-    link?: string
-    code?: string
-    github?: string
-}
-
 function WebsiteCard({
     title,
     description,
@@ -34,7 +24,7 @@ function WebsiteCard({
     techStack,
     code,
     github,
-}: WebsiteCardProps) {
+}: IWebsiteCard) {
     return (
         <Card>
             <CardHeader>
