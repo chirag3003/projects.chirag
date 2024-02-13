@@ -1,5 +1,9 @@
 import { cn } from '@/lib/utils'
-import { ArrowTopRightIcon, CodeIcon } from '@radix-ui/react-icons'
+import {
+    ArrowTopRightIcon,
+    CodeIcon,
+    GitHubLogoIcon,
+} from '@radix-ui/react-icons'
 import React from 'react'
 import { buttonVariants } from '../ui/button'
 import Link from 'next/link'
@@ -17,7 +21,9 @@ interface WebsiteCardProps {
     description: string
     techStack: string[]
     image: string
-    link: string
+    link?: string
+    code?: string
+    github?: string
 }
 
 function WebsiteCard({
@@ -26,6 +32,8 @@ function WebsiteCard({
     image,
     link,
     techStack,
+    code,
+    github,
 }: WebsiteCardProps) {
     return (
         <Card>
@@ -55,19 +63,52 @@ function WebsiteCard({
                 </div>
             </CardContent>
             <CardFooter className="flex items-center justify-end">
-                <Link
-                    href={link}
-                    className={cn(buttonVariants(), 'font-semibold')}
-                    target="_blank"
-                    referrerPolicy="no-referrer"
-                >
-                    Visit Site
-                    <ArrowTopRightIcon
-                        className="ml-5"
-                        height={18}
-                        width={18}
-                    />
-                </Link>
+                {github && (
+                    <Link
+                        href={github}
+                        className={cn(
+                            buttonVariants({
+                                variant: 'outline',
+                                size: 'icon',
+                            }),
+                            'font-semibold'
+                        )}
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                    >
+                        <GitHubLogoIcon height={18} width={18} />
+                    </Link>
+                )}
+                {code && (
+                    <Link
+                        href={code}
+                        className={cn(buttonVariants(), 'font-semibold')}
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                    >
+                        View Code
+                        <ArrowTopRightIcon
+                            className="ml-5"
+                            height={18}
+                            width={18}
+                        />
+                    </Link>
+                )}
+                {link && (
+                    <Link
+                        href={link}
+                        className={cn(buttonVariants(), 'font-semibold')}
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                    >
+                        Visit Site
+                        <ArrowTopRightIcon
+                            className="ml-5"
+                            height={18}
+                            width={18}
+                        />
+                    </Link>
+                )}
             </CardFooter>
         </Card>
     )
