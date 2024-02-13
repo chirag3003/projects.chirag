@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
-import { ArrowTopRightIcon } from '@radix-ui/react-icons'
+import { ArrowTopRightIcon, CodeIcon } from '@radix-ui/react-icons'
 import React from 'react'
 import { buttonVariants } from '../ui/button'
-import { Link } from 'react-feather'
+import Link from 'next/link'
 import {
     Card,
     CardContent,
@@ -58,6 +58,8 @@ function WebsiteCard({
                 <Link
                     href={link}
                     className={cn(buttonVariants(), 'font-semibold')}
+                    target="_blank"
+                    referrerPolicy="no-referrer"
                 >
                     Visit Site
                     <ArrowTopRightIcon
