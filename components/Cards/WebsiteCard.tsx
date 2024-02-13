@@ -59,7 +59,7 @@ function WebsiteCard({
                     href={link}
                     className={cn(buttonVariants(), 'font-semibold')}
                 >
-                    Visit Site{' '}
+                    Visit Site
                     <ArrowTopRightIcon
                         className="ml-5"
                         height={18}
