@@ -1,6 +1,6 @@
 export const myProjects: IWebsiteCard[] = [
     {
-        title: 'Portfolio',
+        title: 'Portfolio Website',
         description: 'MY Personal Portfolio',
         image: '/projects/portfolio.png',
         techStack: ['NextJS', 'React', 'TailwindCSS', 'Shadcn'],
