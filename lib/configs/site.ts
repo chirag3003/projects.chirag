@@ -7,7 +7,7 @@ export const siteConfig = {
   url: "https://chirag.codes",
   mainPortfolio: "https://chirag.codes",
   links: {
-    github: "https://github.com/chirag",
+    github: "https://github.com/chirag3003",
   },
 }
 
