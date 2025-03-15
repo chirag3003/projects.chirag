@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, FolderKanban, Tag, ListFilter, Settings, LogOut, Menu, X } from "lucide-react"
+import { LayoutDashboard, FolderKanban, Tag, ListFilter, Settings, LogOut, X } from "lucide-react"
 import { useAuth } from "@/lib/hooks/use-auth"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -71,45 +71,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen max-h-screen overflow-hidden">
-      {/* Fixed Navbar */}
-      <div className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-border bg-background/80 backdrop-blur-md flex items-center px-4 md:px-6">
-        <div className="md:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            className="mr-2"
-          >
-            {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-xl font-bold md:hidden">Dashboard</h1>
-
-          <div className="flex items-center ml-auto gap-4">
-            <div className="text-sm text-muted-foreground hidden md:block">
-              Logged in as <span className="font-medium text-foreground">{user?.name || "User"}</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="h-8">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-background border-r border-border transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
-        style={{ top: "64px", height: "calc(100% - 64px)" }}
       >
         <div className="flex h-full flex-col overflow-y-auto">
-          <div className="flex h-16 items-center justify-center border-b border-border px-4 md:h-16 md:border-b-0 hidden md:flex">
+          <div className="flex h-16 items-center justify-between px-4 border-b border-border">
             <h1 className="text-xl font-bold">Dashboard</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              className="md:hidden"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
           <nav className="flex-1 space-y-1 px-2 py-4">
@@ -134,6 +113,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )
             })}
           </nav>
+
+          {/* User details and logout at the bottom of sidebar */}
+          <div className="border-t border-border p-4">
+            <div className="flex flex-col space-y-3">
+              <div className="text-sm text-muted-foreground">
+                Logged in as <span className="font-medium text-foreground">{user?.name || "User"}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="w-full justify-start">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -147,7 +139,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden w-full mt-16">
+      <div className="flex flex-1 flex-col overflow-hidden w-full">
         <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-full">
           <div className="mx-auto w-full max-w-full overflow-x-hidden">{children}</div>
         </main>

@@ -10,7 +10,14 @@ import { ThemeProvider } from "@/components/theme-provider"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      // Add suppressHydrationWarning to prevent hydration warnings
+      suppressHydrationWarning
+    >
       <AuthProvider>
         <ProjectsProvider>
           <CategoriesProvider>

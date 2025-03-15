@@ -170,7 +170,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-14">
+      {" "}
+      {/* Add padding-top equal to header height */}
       <main className="container max-w-screen-2xl px-4 sm:px-6 py-6 md:py-12">
         {/* Combined Hero & Bio Section */}
         <section className="py-10 md:py-16 lg:py-20 border-b">
@@ -328,7 +330,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
       <footer className="border-t py-6 md:py-0">
         <div className="container max-w-screen-2xl px-4 sm:px-6 flex h-14 items-center">
           <p className="text-center text-sm text-muted-foreground md:text-left">

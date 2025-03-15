@@ -116,7 +116,7 @@ export default function CodePensPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-14">
       <main className="container max-w-screen-2xl px-4 sm:px-6 py-6 md:py-12">
         {/* Hero Section */}
         <section className="py-10 md:py-16 lg:py-20 border-b">
