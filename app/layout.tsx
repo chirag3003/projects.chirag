@@ -5,13 +5,13 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { siteConfig } from "@/lib/configs/site"
 import Header from "@/components/header"
+import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} | ${siteConfig.title}`,
   description: siteConfig.description,
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -22,14 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Header />
-        {children}
-        <Toaster />
+        <Providers>
+          <Header />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   )
 }
 
-
-
-import './globals.css'
