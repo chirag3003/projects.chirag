@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ExternalLink, Github, Star, Play } from "lucide-react"
+import { ExternalLink, Github, Star, Play, Codepen } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,7 @@ interface ProjectCardProps {
   demoUrl: string
   repoUrl: string
   stackblitzUrl?: string
+  codepenUrl?: string
   featured?: boolean
 }
 
@@ -24,6 +25,7 @@ export default function ProjectCard({
   demoUrl,
   repoUrl,
   stackblitzUrl,
+  codepenUrl,
   featured = false,
 }: ProjectCardProps) {
   return (
@@ -71,6 +73,17 @@ export default function ProjectCard({
                 <Play className="h-5 w-5" />
               </Link>
             )}
+            {codepenUrl && (
+              <Link
+                href={codepenUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-10 w-10 rounded-full bg-black/90 backdrop-blur-sm text-white hover:bg-black transition-colors duration-200 shadow-md"
+                aria-label="View on CodePen"
+              >
+                <Codepen className="h-5 w-5" />
+              </Link>
+            )}
           </div>
         </div>
         {featured && (
@@ -82,6 +95,12 @@ export default function ProjectCard({
           <div className="absolute bottom-0 right-0 bg-blue-500/90 text-white py-1 px-2 m-2 rounded text-xs font-medium flex items-center">
             <Play className="h-3 w-3 mr-1" />
             StackBlitz
+          </div>
+        )}
+        {codepenUrl && (
+          <div className="absolute bottom-0 right-0 bg-black/90 text-white py-1 px-2 m-2 rounded text-xs font-medium flex items-center">
+            <Codepen className="h-3 w-3 mr-1" />
+            CodePen
           </div>
         )}
       </div>
@@ -133,6 +152,18 @@ export default function ProjectCard({
                 </span>
                 Run in StackBlitz
               </Link>
+            ) : codepenUrl ? (
+              <Link
+                href={codepenUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center text-sm font-medium text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors"
+              >
+                <span className="mr-2 h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-gray-700 transition-colors">
+                  <Codepen className="h-3.5 w-3.5" />
+                </span>
+                View on CodePen
+              </Link>
             ) : (
               <>
                 <div className="h-8 w-px bg-border"></div>
@@ -152,17 +183,30 @@ export default function ProjectCard({
           </div>
         </CardFooter>
       )}
-      {!featured && stackblitzUrl && (
+      {!featured && (stackblitzUrl || codepenUrl) && (
         <CardFooter className="pt-2 pb-4">
-          <Link
-            href={stackblitzUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors flex items-center"
-          >
-            <Play className="mr-2 h-3.5 w-3.5" />
-            Run in StackBlitz
-          </Link>
+          {stackblitzUrl && (
+            <Link
+              href={stackblitzUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors flex items-center"
+            >
+              <Play className="mr-2 h-3.5 w-3.5" />
+              Run in StackBlitz
+            </Link>
+          )}
+          {codepenUrl && (
+            <Link
+              href={codepenUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white transition-colors flex items-center"
+            >
+              <Codepen className="mr-2 h-3.5 w-3.5" />
+              View on CodePen
+            </Link>
+          )}
         </CardFooter>
       )}
     </Card>

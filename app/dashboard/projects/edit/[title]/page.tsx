@@ -10,18 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  MultiSelect,
-  MultiSelectContent,
-  MultiSelectItem,
-  MultiSelectTrigger,
-  MultiSelectValue,
-} from "@/components/multi-select"
 import { useToast } from "@/components/ui/use-toast"
 import { useProjects } from "@/lib/hooks/use-projects"
 import { useCategories } from "@/lib/hooks/use-categories"
 import { useTags } from "@/lib/hooks/use-tags"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
+import { TagInput } from "@/components/tag-input"
+import { CategorySelector } from "@/components/category-selector"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function EditProjectPage({ params }: { params: { title: string } }) {
   const router = useRouter()
@@ -50,9 +47,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
     demoUrl: string
     repoUrl: string
     stackblitzUrl: string
+    codepenUrl: string
     featured: boolean
     selectedCategories: string[]
     selectedTags: string[]
+    embedType: "none" | "stackblitz" | "codepen"
   }>({
     title: "",
     description: "",
@@ -60,9 +59,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
     demoUrl: "",
     repoUrl: "",
     stackblitzUrl: "",
+    codepenUrl: "",
     featured: false,
     selectedCategories: [],
     selectedTags: [],
+    embedType: "none",
   })
 
   useEffect(() => {
@@ -76,6 +77,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
 
   useEffect(() => {
     if (!isLoading && project) {
+      // Determine embed type based on existing URLs
+      let embedType: "none" | "stackblitz" | "codepen" = "none"
+      if (project.stackblitzUrl) embedType = "stackblitz"
+      if (project.codepenUrl) embedType = "codepen"
+
       setFormData({
         title: project.title,
         description: project.description,
@@ -83,9 +89,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         demoUrl: project.demoUrl || "",
         repoUrl: project.repoUrl || "",
         stackblitzUrl: project.stackblitzUrl || "",
+        codepenUrl: project.codepenUrl || "",
         featured: project.featured || false,
         selectedCategories: project.categories || [],
         selectedTags: project.tags || [],
+        embedType,
       })
     } else if (!isLoading && !project) {
       // If project not found, redirect to projects page
@@ -100,7 +108,35 @@ export default function EditProjectPage({ params }: { params: { title: string } 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // If changing one of the embed URLs, handle the mutual exclusivity
+    if (name === "stackblitzUrl" && value && formData.embedType !== "stackblitz") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        codepenUrl: "", // Clear the other URL
+        embedType: "stackblitz",
+      }))
+    } else if (name === "codepenUrl" && value && formData.embedType !== "codepen") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        stackblitzUrl: "", // Clear the other URL
+        embedType: "codepen",
+      }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
+  }
+
+  const handleEmbedTypeChange = (value: "none" | "stackblitz" | "codepen") => {
+    setFormData((prev) => ({
+      ...prev,
+      embedType: value,
+      // Clear the URLs that aren't selected
+      stackblitzUrl: value === "stackblitz" ? prev.stackblitzUrl : "",
+      codepenUrl: value === "codepen" ? prev.codepenUrl : "",
+    }))
   }
 
   const handleCheckboxChange = (checked: boolean) => {
@@ -140,7 +176,7 @@ export default function EditProjectPage({ params }: { params: { title: string } 
     if (formData.selectedTags.length === 0) {
       toast({
         title: "Validation Error",
-        description: "Please select at least one tag",
+        description: "Please add at least one tag",
         variant: "destructive",
       })
       return
@@ -156,6 +192,7 @@ export default function EditProjectPage({ params }: { params: { title: string } 
       demoUrl: formData.demoUrl,
       repoUrl: formData.repoUrl,
       stackblitzUrl: formData.stackblitzUrl || undefined,
+      codepenUrl: formData.codepenUrl || undefined,
       featured: formData.featured,
     })
 
@@ -243,40 +280,25 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                 <Label htmlFor="categories">
                   Categories <span className="text-destructive">*</span>
                 </Label>
-                <MultiSelect
+                <CategorySelector
                   value={formData.selectedCategories}
-                  onValueChange={handleCategoriesChange}
-                  placeholder="Select categories"
-                >
-                  <MultiSelectTrigger className="w-full">
-                    <MultiSelectValue placeholder="Select categories" />
-                  </MultiSelectTrigger>
-                  <MultiSelectContent>
-                    {categories.map((category) => (
-                      <MultiSelectItem key={category} value={category}>
-                        {category}
-                      </MultiSelectItem>
-                    ))}
-                  </MultiSelectContent>
-                </MultiSelect>
+                  onChange={handleCategoriesChange}
+                  options={categories}
+                  placeholder="Select categories..."
+                />
+                <p className="text-xs text-muted-foreground">Select from predefined categories</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="tags">
                   Tags <span className="text-destructive">*</span>
                 </Label>
-                <MultiSelect value={formData.selectedTags} onValueChange={handleTagsChange} placeholder="Select tags">
-                  <MultiSelectTrigger className="w-full">
-                    <MultiSelectValue placeholder="Select tags" />
-                  </MultiSelectTrigger>
-                  <MultiSelectContent>
-                    {tags.map((tag) => (
-                      <MultiSelectItem key={tag} value={tag}>
-                        {tag}
-                      </MultiSelectItem>
-                    ))}
-                  </MultiSelectContent>
-                </MultiSelect>
+                <TagInput
+                  value={formData.selectedTags}
+                  onChange={handleTagsChange}
+                  placeholder="Add tag and press Enter..."
+                />
+                <p className="text-xs text-muted-foreground">Press Enter to add a tag</p>
               </div>
 
               <div className="space-y-2">
@@ -314,15 +336,73 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="stackblitzUrl">StackBlitz URL (optional)</Label>
-                <Input
-                  id="stackblitzUrl"
-                  name="stackblitzUrl"
-                  value={formData.stackblitzUrl}
-                  onChange={handleInputChange}
-                  placeholder="https://stackblitz.com/edit/project"
-                />
+              <div className="space-y-4">
+                <div>
+                  <Label>Interactive Embed (Optional)</Label>
+                  <p className="text-xs text-muted-foreground mt-1 mb-2">
+                    Choose one type of interactive embed for your project
+                  </p>
+
+                  <RadioGroup
+                    value={formData.embedType}
+                    onValueChange={(value) => handleEmbedTypeChange(value as "none" | "stackblitz" | "codepen")}
+                    className="flex flex-col space-y-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="none" id="embed-none" />
+                      <Label htmlFor="embed-none" className="cursor-pointer">
+                        None
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="stackblitz" id="embed-stackblitz" />
+                      <Label htmlFor="embed-stackblitz" className="cursor-pointer">
+                        StackBlitz
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="codepen" id="embed-codepen" />
+                      <Label htmlFor="embed-codepen" className="cursor-pointer">
+                        CodePen
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {formData.embedType === "stackblitz" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="stackblitzUrl">StackBlitz URL</Label>
+                    <Input
+                      id="stackblitzUrl"
+                      name="stackblitzUrl"
+                      value={formData.stackblitzUrl}
+                      onChange={handleInputChange}
+                      placeholder="https://stackblitz.com/edit/project"
+                    />
+                  </div>
+                )}
+
+                {formData.embedType === "codepen" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="codepenUrl">CodePen URL</Label>
+                    <Input
+                      id="codepenUrl"
+                      name="codepenUrl"
+                      value={formData.codepenUrl}
+                      onChange={handleInputChange}
+                      placeholder="https://codepen.io/username/pen/pen-id"
+                    />
+                  </div>
+                )}
+
+                {formData.stackblitzUrl && formData.codepenUrl && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      You can only provide either a StackBlitz URL or a CodePen URL, not both.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
           </CardContent>

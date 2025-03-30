@@ -7,6 +7,7 @@ export interface Project {
   demoUrl: string
   repoUrl: string
   stackblitzUrl?: string
+  codepenUrl?: string
   featured?: boolean
 }
 
