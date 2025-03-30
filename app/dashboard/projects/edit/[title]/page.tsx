@@ -1,57 +1,65 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/components/ui/use-toast"
-import { useProjects } from "@/lib/hooks/use-projects"
-import { useCategories } from "@/lib/hooks/use-categories"
-import { useTags } from "@/lib/hooks/use-tags"
-import { Loader2, AlertCircle } from "lucide-react"
-import { TagInput } from "@/components/tag-input"
-import { CategorySelector } from "@/components/category-selector"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { useProjects } from "@/lib/hooks/use-projects";
+import { useCategories } from "@/lib/hooks/use-categories";
+import { useTags } from "@/lib/hooks/use-tags";
+import { Loader2, AlertCircle } from "lucide-react";
+import { TagInput } from "@/components/tag-input";
+import { CategorySelector } from "@/components/category-selector";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function EditProjectPage({ params }: { params: { title: string } }) {
-  const router = useRouter()
-  const { toast } = useToast()
+export default function EditProjectPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const params = useParams();
 
   // Add loading states to handle potential undefined values
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
 
   // Safely access hooks with error handling
-  const projectsContext = useProjects()
-  const categoriesContext = useCategories()
-  const tagsContext = useTags()
+  const projectsContext = useProjects();
+  const categoriesContext = useCategories();
+  const tagsContext = useTags();
 
   // Safely destructure values with fallbacks
-  const { projects = [], updateProject = () => {} } = projectsContext || {}
-  const { categories = [] } = categoriesContext || {}
-  const { tags = [] } = tagsContext || {}
+  const { projects = [], updateProject = () => {} } = projectsContext || {};
+  const { categories = [] } = categoriesContext || {};
+  const { tags = [] } = tagsContext || {};
 
-  const decodedTitle = decodeURIComponent(params.title)
-  const project = projects.find((p) => p.title === decodedTitle)
+  const decodedTitle = decodeURIComponent(params.title as string);
+  const project = projects.find((p) => p.title === decodedTitle);
 
   const [formData, setFormData] = useState<{
-    title: string
-    description: string
-    image: string
-    demoUrl: string
-    repoUrl: string
-    stackblitzUrl: string
-    codepenUrl: string
-    featured: boolean
-    selectedCategories: string[]
-    selectedTags: string[]
-    embedType: "none" | "stackblitz" | "codepen"
+    title: string;
+    description: string;
+    image: string;
+    demoUrl: string;
+    repoUrl: string;
+    stackblitzUrl: string;
+    codepenUrl: string;
+    featured: boolean;
+    selectedCategories: string[];
+    selectedTags: string[];
+    embedType: "none" | "stackblitz" | "codepen";
   }>({
     title: "",
     description: "",
@@ -64,23 +72,23 @@ export default function EditProjectPage({ params }: { params: { title: string } 
     selectedCategories: [],
     selectedTags: [],
     embedType: "none",
-  })
+  });
 
   useEffect(() => {
     // Set loading to false after a short delay to ensure contexts are loaded
     const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 500)
+      setIsLoading(false);
+    }, 500);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && project) {
       // Determine embed type based on existing URLs
-      let embedType: "none" | "stackblitz" | "codepen" = "none"
-      if (project.stackblitzUrl) embedType = "stackblitz"
-      if (project.codepenUrl) embedType = "codepen"
+      let embedType: "none" | "stackblitz" | "codepen" = "none";
+      if (project.stackblitzUrl) embedType = "stackblitz";
+      if (project.codepenUrl) embedType = "codepen";
 
       setFormData({
         title: project.title,
@@ -94,40 +102,50 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         selectedCategories: project.categories || [],
         selectedTags: project.tags || [],
         embedType,
-      })
+      });
     } else if (!isLoading && !project) {
       // If project not found, redirect to projects page
       toast({
         title: "Project not found",
         description: "The project you're trying to edit doesn't exist",
         variant: "destructive",
-      })
-      router.push("/dashboard/projects")
+      });
+      router.push("/dashboard/projects");
     }
-  }, [project, router, toast, isLoading])
+  }, [project, router, toast, isLoading]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
 
     // If changing one of the embed URLs, handle the mutual exclusivity
-    if (name === "stackblitzUrl" && value && formData.embedType !== "stackblitz") {
+    if (
+      name === "stackblitzUrl" &&
+      value &&
+      formData.embedType !== "stackblitz"
+    ) {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
         codepenUrl: "", // Clear the other URL
         embedType: "stackblitz",
-      }))
-    } else if (name === "codepenUrl" && value && formData.embedType !== "codepen") {
+      }));
+    } else if (
+      name === "codepenUrl" &&
+      value &&
+      formData.embedType !== "codepen"
+    ) {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
         stackblitzUrl: "", // Clear the other URL
         embedType: "codepen",
-      }))
+      }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const handleEmbedTypeChange = (value: "none" | "stackblitz" | "codepen") => {
     setFormData((prev) => ({
@@ -136,23 +154,23 @@ export default function EditProjectPage({ params }: { params: { title: string } 
       // Clear the URLs that aren't selected
       stackblitzUrl: value === "stackblitz" ? prev.stackblitzUrl : "",
       codepenUrl: value === "codepen" ? prev.codepenUrl : "",
-    }))
-  }
+    }));
+  };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, featured: checked }))
-  }
+    setFormData((prev) => ({ ...prev, featured: checked }));
+  };
 
   const handleCategoriesChange = (value: string[]) => {
-    setFormData((prev) => ({ ...prev, selectedCategories: value }))
-  }
+    setFormData((prev) => ({ ...prev, selectedCategories: value }));
+  };
 
   const handleTagsChange = (value: string[]) => {
-    setFormData((prev) => ({ ...prev, selectedTags: value }))
-  }
+    setFormData((prev) => ({ ...prev, selectedTags: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
     if (!formData.title) {
@@ -160,8 +178,8 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         title: "Validation Error",
         description: "Project title is required",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (formData.selectedCategories.length === 0) {
@@ -169,8 +187,8 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         title: "Validation Error",
         description: "Please select at least one category",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (formData.selectedTags.length === 0) {
@@ -178,8 +196,8 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         title: "Validation Error",
         description: "Please add at least one tag",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Update project
@@ -194,15 +212,15 @@ export default function EditProjectPage({ params }: { params: { title: string } 
       stackblitzUrl: formData.stackblitzUrl || undefined,
       codepenUrl: formData.codepenUrl || undefined,
       featured: formData.featured,
-    })
+    });
 
     toast({
       title: "Project updated",
       description: "Your project has been updated successfully",
-    })
+    });
 
-    router.push("/dashboard/projects")
-  }
+    router.push("/dashboard/projects");
+  };
 
   // Show loading state
   if (isLoading) {
@@ -213,26 +231,30 @@ export default function EditProjectPage({ params }: { params: { title: string } 
           <p className="text-lg font-medium">Loading project data...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // If project is not found after loading
   if (!project) {
-    return null
+    return null;
   }
 
   return (
     <div className="space-y-6 w-full max-w-full overflow-hidden">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Edit Project</h1>
-        <p className="text-muted-foreground">Update the details of your project</p>
+        <p className="text-muted-foreground">
+          Update the details of your project
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-full">
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Project Details</CardTitle>
-            <CardDescription>Edit the information about your project</CardDescription>
+            <CardDescription>
+              Edit the information about your project
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
@@ -286,7 +308,9 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                   options={categories}
                   placeholder="Select categories..."
                 />
-                <p className="text-xs text-muted-foreground">Select from predefined categories</p>
+                <p className="text-xs text-muted-foreground">
+                  Select from predefined categories
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -298,13 +322,19 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                   onChange={handleTagsChange}
                   placeholder="Add tag and press Enter..."
                 />
-                <p className="text-xs text-muted-foreground">Press Enter to add a tag</p>
+                <p className="text-xs text-muted-foreground">
+                  Press Enter to add a tag
+                </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="featured">Featured Status</Label>
                 <div className="flex items-center space-x-2 pt-2">
-                  <Checkbox id="featured" checked={formData.featured} onCheckedChange={handleCheckboxChange} />
+                  <Checkbox
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={handleCheckboxChange}
+                  />
                   <label
                     htmlFor="featured"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -345,7 +375,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
 
                   <RadioGroup
                     value={formData.embedType}
-                    onValueChange={(value) => handleEmbedTypeChange(value as "none" | "stackblitz" | "codepen")}
+                    onValueChange={(value) =>
+                      handleEmbedTypeChange(
+                        value as "none" | "stackblitz" | "codepen"
+                      )
+                    }
                     className="flex flex-col space-y-1"
                   >
                     <div className="flex items-center space-x-2">
@@ -355,8 +389,14 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="stackblitz" id="embed-stackblitz" />
-                      <Label htmlFor="embed-stackblitz" className="cursor-pointer">
+                      <RadioGroupItem
+                        value="stackblitz"
+                        id="embed-stackblitz"
+                      />
+                      <Label
+                        htmlFor="embed-stackblitz"
+                        className="cursor-pointer"
+                      >
                         StackBlitz
                       </Label>
                     </div>
@@ -399,7 +439,8 @@ export default function EditProjectPage({ params }: { params: { title: string } 
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      You can only provide either a StackBlitz URL or a CodePen URL, not both.
+                      You can only provide either a StackBlitz URL or a CodePen
+                      URL, not both.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -407,7 +448,11 @@ export default function EditProjectPage({ params }: { params: { title: string } 
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => router.push("/dashboard/projects")}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/dashboard/projects")}
+            >
               Cancel
             </Button>
             <Button type="submit">Update Project</Button>
@@ -415,6 +460,5 @@ export default function EditProjectPage({ params }: { params: { title: string } 
         </Card>
       </form>
     </div>
-  )
+  );
 }
-
