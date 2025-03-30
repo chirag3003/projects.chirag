@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,18 +13,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast"
 import { TagInput } from "@/components/tag-input"
 import { CategorySelector } from "@/components/category-selector"
-import { EmbedTypeSelector } from "@/components/embed-type-selector"
-import type { Project } from "@/lib/types"
+import { createProjectSchema, type CreateProjectInput } from "@/lib/schemas/project"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 interface ProjectFormProps {
-  initialData?: Partial<Project>
+  initialData?: Partial<CreateProjectInput>
   categories: string[]
-  onSubmit: (
-    project: Omit<Project, "stackblitzUrl" | "codepenUrl"> & {
-      stackblitzUrl: string
-      codepenUrl: string
-    },
-  ) => void
+  onSubmit: (project: CreateProjectInput) => void
   submitButtonText: string
   title: string
   description: string
@@ -38,236 +35,305 @@ export function ProjectForm({
 }: ProjectFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const [embedType, setEmbedType] = React.useState<"none" | "stackblitz" | "codepen">(
+    initialData?.stackblitzUrl ? "stackblitz" : initialData?.codepenUrl ? "codepen" : "none",
+  )
 
-  const [formData, setFormData] = React.useState({
-    title: initialData?.title || "",
-    description: initialData?.description || "",
-    image: initialData?.image || "/placeholder.svg?height=400&width=600",
-    demoUrl: initialData?.demoUrl || "",
-    repoUrl: initialData?.repoUrl || "",
-    stackblitzUrl: initialData?.stackblitzUrl || "",
-    codepenUrl: initialData?.codepenUrl || "",
-    featured: initialData?.featured || false,
-    selectedCategories: initialData?.categories || [],
-    selectedTags: initialData?.tags || [],
-    embedType: initialData?.stackblitzUrl
-      ? "stackblitz"
-      : initialData?.codepenUrl
-        ? "codepen"
-        : ("none" as "none" | "stackblitz" | "codepen"),
+  const form = useForm<CreateProjectInput>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      title: initialData?.title || "",
+      description: initialData?.description || "",
+      image: initialData?.image || "/placeholder.svg?height=400&width=600",
+      demoUrl: initialData?.demoUrl || "https://example.com",
+      repoUrl: initialData?.repoUrl || "https://github.com",
+      stackblitzUrl: initialData?.stackblitzUrl || "",
+      codepenUrl: initialData?.codepenUrl || "",
+      featured: initialData?.featured || false,
+      tags: initialData?.tags || [],
+      categories: initialData?.categories || [],
+    },
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, featured: checked }))
-  }
-
-  const handleCategoriesChange = (value: string[]) => {
-    setFormData((prev) => ({ ...prev, selectedCategories: value }))
-  }
-
-  const handleTagsChange = (value: string[]) => {
-    setFormData((prev) => ({ ...prev, selectedTags: value }))
-  }
-
   const handleEmbedTypeChange = (type: "none" | "stackblitz" | "codepen") => {
-    setFormData((prev) => ({
-      ...prev,
-      embedType: type,
-      // Clear the URLs that aren't selected
-      stackblitzUrl: type === "stackblitz" ? prev.stackblitzUrl : "",
-      codepenUrl: type === "codepen" ? prev.codepenUrl : "",
-    }))
+    setEmbedType(type)
+
+    // Clear the URLs that aren't selected
+    if (type === "none") {
+      form.setValue("stackblitzUrl", "")
+      form.setValue("codepenUrl", "")
+    } else if (type === "stackblitz") {
+      form.setValue("codepenUrl", "")
+    } else if (type === "codepen") {
+      form.setValue("stackblitzUrl", "")
+    }
   }
 
-  const handleStackblitzUrlChange = (url: string) => {
-    setFormData((prev) => ({ ...prev, stackblitzUrl: url }))
-  }
-
-  const handleCodepenUrlChange = (url: string) => {
-    setFormData((prev) => ({ ...prev, codepenUrl: url }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Validate form
-    if (!formData.title) {
+  const handleFormSubmit = (data: CreateProjectInput) => {
+    try {
+      onSubmit(data)
+    } catch (error) {
+      console.error("Form submission error:", error)
       toast({
-        title: "Validation Error",
-        description: "Project title is required",
+        title: "Error",
+        description: "There was a problem saving your project.",
         variant: "destructive",
       })
-      return
     }
-
-    if (formData.selectedCategories.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please select at least one category",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (formData.selectedTags.length === 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please add at least one tag",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Submit the project
-    onSubmit({
-      title: formData.title,
-      description: formData.description,
-      image: formData.image,
-      tags: formData.selectedTags,
-      categories: formData.selectedCategories,
-      demoUrl: formData.demoUrl || "https://example.com",
-      repoUrl: formData.repoUrl || "https://github.com",
-      stackblitzUrl: formData.stackblitzUrl,
-      codepenUrl: formData.codepenUrl,
-      featured: formData.featured,
-    })
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">
-              Project Title <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="title"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
               name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="E-commerce Platform"
-              required
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>
+                    Project Title <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="E-commerce Platform" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              Description <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="description"
+            <FormField
+              control={form.control}
               name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="A full-featured e-commerce platform built with Next.js..."
-              className="min-h-[120px]"
-              required
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>
+                    Description <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="A full-featured e-commerce platform built with Next.js..."
+                      className="min-h-[120px]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
-              <Input
-                id="image"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
                 name="image"
-                value={formData.image}
-                onChange={handleInputChange}
-                placeholder="/placeholder.svg?height=400&width=600"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Image URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="/placeholder.svg?height=400&width=600" />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">Leave default for a placeholder image</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">Leave default for a placeholder image</p>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="categories">
-                Categories <span className="text-destructive">*</span>
-              </Label>
-              <CategorySelector
-                value={formData.selectedCategories}
-                onChange={handleCategoriesChange}
-                options={categories}
-                placeholder="Select categories..."
+              <FormField
+                control={form.control}
+                name="categories"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>
+                      Categories <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <CategorySelector
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={categories}
+                        placeholder="Select categories..."
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">Select from predefined categories</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">Select from predefined categories</p>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tags">
-                Tags <span className="text-destructive">*</span>
-              </Label>
-              <TagInput
-                value={formData.selectedTags}
-                onChange={handleTagsChange}
-                placeholder="Add tag and press Enter..."
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>
+                      Tags <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <TagInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Add tag and press Enter..."
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">Press Enter to add a tag</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">Press Enter to add a tag</p>
+
+              <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Featured Status</FormLabel>
+                    <div className="flex items-center space-x-2 pt-2">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} id="featured" />
+                      </FormControl>
+                      <label
+                        htmlFor="featured"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Mark as featured project
+                      </label>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="featured">Featured Status</Label>
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox id="featured" checked={formData.featured} onCheckedChange={handleCheckboxChange} />
-                <label
-                  htmlFor="featured"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Mark as featured project
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="demoUrl">Demo URL</Label>
-              <Input
-                id="demoUrl"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
                 name="demoUrl"
-                value={formData.demoUrl}
-                onChange={handleInputChange}
-                placeholder="https://example.com"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Demo URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://example.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="repoUrl">Repository URL</Label>
-              <Input
-                id="repoUrl"
+              <FormField
+                control={form.control}
                 name="repoUrl"
-                value={formData.repoUrl}
-                onChange={handleInputChange}
-                placeholder="https://github.com/username/repo"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Repository URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="https://github.com/username/repo" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <EmbedTypeSelector
-            embedType={formData.embedType}
-            stackblitzUrl={formData.stackblitzUrl}
-            codepenUrl={formData.codepenUrl}
-            onEmbedTypeChange={handleEmbedTypeChange}
-            onStackblitzUrlChange={handleStackblitzUrlChange}
-            onCodepenUrlChange={handleCodepenUrlChange}
-          />
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button type="button" variant="outline" onClick={() => router.push("/dashboard/projects")}>
-            Cancel
-          </Button>
-          <Button type="submit">{submitButtonText}</Button>
-        </CardFooter>
-      </Card>
-    </form>
+            <div className="space-y-4">
+              <div>
+                <Label>Interactive Embed (Optional)</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-2">
+                  Choose one type of interactive embed for your project
+                </p>
+
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="embed-none"
+                      name="embedType"
+                      value="none"
+                      checked={embedType === "none"}
+                      onChange={() => handleEmbedTypeChange("none")}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="embed-none" className="cursor-pointer">
+                      None
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="embed-stackblitz"
+                      name="embedType"
+                      value="stackblitz"
+                      checked={embedType === "stackblitz"}
+                      onChange={() => handleEmbedTypeChange("stackblitz")}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="embed-stackblitz" className="cursor-pointer">
+                      StackBlitz
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="embed-codepen"
+                      name="embedType"
+                      value="codepen"
+                      checked={embedType === "codepen"}
+                      onChange={() => handleEmbedTypeChange("codepen")}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="embed-codepen" className="cursor-pointer">
+                      CodePen
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {embedType === "stackblitz" && (
+                <FormField
+                  control={form.control}
+                  name="stackblitzUrl"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>StackBlitz URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://stackblitz.com/edit/project" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {embedType === "codepen" && (
+                <FormField
+                  control={form.control}
+                  name="codepenUrl"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>CodePen URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://codepen.io/username/pen/pen-id" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button type="button" variant="outline" onClick={() => router.push("/dashboard/projects")}>
+              Cancel
+            </Button>
+            <Button type="submit">{submitButtonText}</Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   )
 }
 

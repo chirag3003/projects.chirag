@@ -10,22 +10,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 
 interface DeleteProjectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectTitle: string | null
+  projectId: string | null
   onConfirm: () => void
 }
 
-export function DeleteProjectDialog({ open, onOpenChange, projectTitle, onConfirm }: DeleteProjectDialogProps) {
+export function DeleteProjectDialog({ open, onOpenChange, projectId, onConfirm }: DeleteProjectDialogProps) {
+  const { getProjectById } = useProjectsStore()
+  const project = projectId ? getProjectById(projectId) : null
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the project "{projectTitle}". This action cannot be undone.
+            This will permanently delete the project "{project?.title}". This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

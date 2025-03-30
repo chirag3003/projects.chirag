@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
-import { useTags } from "@/lib/hooks/use-tags"
-import { useProjects } from "@/lib/hooks/use-projects"
+import { useTagsStore } from "@/lib/stores/use-tags-store"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { ItemSearch } from "@/components/dashboard/item-search"
 import { ItemListView } from "@/components/dashboard/item-list-view"
 import { DeleteItemDialog } from "@/components/dashboard/delete-item-dialog"
@@ -12,8 +12,8 @@ import { AddItemDialog, AddItemButton } from "@/components/dashboard/add-item-di
 
 export default function TagsPage() {
   const { toast } = useToast()
-  const { tags, addTag, updateTag, deleteTag } = useTags()
-  const { projects } = useProjects()
+  const { tags, addTag, updateTag, deleteTag } = useTagsStore()
+  const { projects } = useProjectsStore()
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [tagToDelete, setTagToDelete] = useState<string | null>(null)

@@ -20,12 +20,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { Project } from "@/lib/types"
+import type { Project } from "@/lib/schemas/project"
 
 interface ProjectGridViewProps {
   projects: Project[]
   searchTerm: string
-  onDeleteClick: (title: string) => void
+  onDeleteClick: (id: string) => void
   clearSearch: () => void
 }
 
@@ -37,7 +37,7 @@ export function ProjectGridView({ projects, searchTerm, onDeleteClick, clearSear
       {projects.length > 0 ? (
         projects.map((project) => (
           <Card
-            key={project.title}
+            key={project.id}
             className="overflow-hidden group h-full flex flex-col transition-all duration-300 hover:shadow-md"
           >
             <div className="relative aspect-video overflow-hidden">
@@ -71,7 +71,7 @@ export function ProjectGridView({ projects, searchTerm, onDeleteClick, clearSear
                     variant="secondary"
                     size="icon"
                     className="flex items-center justify-center h-10 w-10 rounded-full bg-secondary/90 backdrop-blur-sm text-secondary-foreground hover:bg-secondary transition-colors duration-200 shadow-md"
-                    onClick={() => router.push(`/dashboard/projects/edit/${encodeURIComponent(project.title)}`)}
+                    onClick={() => router.push(`/dashboard/projects/edit/${project.id}`)}
                     aria-label="Edit project"
                   >
                     <Pencil className="h-5 w-5" />
@@ -107,15 +107,13 @@ export function ProjectGridView({ projects, searchTerm, onDeleteClick, clearSear
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={() => router.push(`/dashboard/projects/edit/${encodeURIComponent(project.title)}`)}
-                    >
+                    <DropdownMenuItem onClick={() => router.push(`/dashboard/projects/edit/${project.id}`)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
-                      onClick={() => onDeleteClick(project.title)}
+                      onClick={() => onDeleteClick(project.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -145,15 +143,11 @@ export function ProjectGridView({ projects, searchTerm, onDeleteClick, clearSear
               </div>
             </CardContent>
             <CardFooter className="pt-2 pb-4 flex justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(`/dashboard/projects/edit/${encodeURIComponent(project.title)}`)}
-              >
+              <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/projects/edit/${project.id}`)}>
                 <Pencil className="mr-2 h-3.5 w-3.5" />
                 Edit
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => onDeleteClick(project.title)}>
+              <Button variant="destructive" size="sm" onClick={() => onDeleteClick(project.id)}>
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
                 Delete
               </Button>

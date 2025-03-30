@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
-import { useCategories } from "@/lib/hooks/use-categories"
-import { useProjects } from "@/lib/hooks/use-projects"
+import { useCategoriesStore } from "@/lib/stores/use-categories-store"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { ItemSearch } from "@/components/dashboard/item-search"
 import { ItemListView } from "@/components/dashboard/item-list-view"
 import { DeleteItemDialog } from "@/components/dashboard/delete-item-dialog"
@@ -12,8 +12,8 @@ import { AddItemDialog, AddItemButton } from "@/components/dashboard/add-item-di
 
 export default function CategoriesPage() {
   const { toast } = useToast()
-  const { categories, addCategory, updateCategory, deleteCategory } = useCategories()
-  const { projects } = useProjects()
+  const { categories, addCategory, updateCategory, deleteCategory } = useCategoriesStore()
+  const { projects } = useProjectsStore()
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null)

@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
-import type { Project } from "@/lib/types"
+import type { Project } from "@/lib/schemas/project"
 
 interface ProjectListViewProps {
   projects: Project[]
   searchTerm: string
-  onDeleteClick: (title: string) => void
+  onDeleteClick: (id: string) => void
 }
 
 export function ProjectListView({ projects, searchTerm, onDeleteClick }: ProjectListViewProps) {
@@ -33,7 +33,7 @@ export function ProjectListView({ projects, searchTerm, onDeleteClick }: Project
         <TableBody>
           {projects.length > 0 ? (
             projects.map((project) => (
-              <TableRow key={project.title}>
+              <TableRow key={project.id}>
                 <TableCell className="font-medium">
                   <div className="flex flex-col">
                     <span>{project.title}</span>
@@ -78,15 +78,13 @@ export function ProjectListView({ projects, searchTerm, onDeleteClick }: Project
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/dashboard/projects/edit/${encodeURIComponent(project.title)}`)}
-                      >
+                      <DropdownMenuItem onClick={() => router.push(`/dashboard/projects/edit/${project.id}`)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
-                        onClick={() => onDeleteClick(project.title)}
+                        onClick={() => onDeleteClick(project.id)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete

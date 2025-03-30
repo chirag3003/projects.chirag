@@ -3,32 +3,24 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
-import { useProjects } from "@/lib/hooks/use-projects"
-import { useCategories } from "@/lib/hooks/use-categories"
-import { useTags } from "@/lib/hooks/use-tags"
+import { useCategoriesStore } from "@/lib/stores/use-categories-store"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { Loader2 } from "lucide-react"
 import { ProjectForm } from "@/components/project-form"
+import type { CreateProjectInput } from "@/lib/schemas/project"
 
-export default function EditProjectPage({ params }: { params: { title: string } }) {
+export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
 
-  // Safely access hooks with error handling
-  const projectsContext = useProjects()
-  const categoriesContext = useCategories()
-  const tagsContext = useTags()
+  const { projects, updateProject, getProjectById } = useProjectsStore()
+  const { categories } = useCategoriesStore()
 
-  // Safely destructure values with fallbacks
-  const { projects = [], updateProject = () => {} } = projectsContext || {}
-  const { categories = [] } = categoriesContext || {}
-  const { tags = [] } = tagsContext || {}
-
-  const decodedTitle = decodeURIComponent(params.title)
-  const project = projects.find((p) => p.title === decodedTitle)
+  const project = getProjectById(params.id)
 
   useEffect(() => {
-    // Set loading to false after a short delay to ensure contexts are loaded
+    // Set loading to false after a short delay to ensure stores are loaded
     const timer = setTimeout(() => {
       setIsLoading(false)
     }, 500)
@@ -48,12 +40,8 @@ export default function EditProjectPage({ params }: { params: { title: string } 
     }
   }, [project, router, toast, isLoading])
 
-  const handleSubmit = (projectData: any) => {
-    updateProject(decodedTitle, {
-      ...projectData,
-      stackblitzUrl: projectData.stackblitzUrl || undefined,
-      codepenUrl: projectData.codepenUrl || undefined,
-    })
+  const handleSubmit = (projectData: CreateProjectInput) => {
+    updateProject(params.id, projectData)
 
     toast({
       title: "Project updated",

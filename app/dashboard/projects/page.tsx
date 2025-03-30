@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { useProjects } from "@/lib/hooks/use-projects"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { ProjectSearch } from "@/components/dashboard/project-search"
 import { ProjectListView } from "@/components/dashboard/project-list-view"
 import { ProjectGridView } from "@/components/dashboard/project-grid-view"
@@ -16,7 +16,7 @@ import { ViewToggle } from "@/components/dashboard/view-toggle"
 export default function ProjectsPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { projects, deleteProject } = useProjects()
+  const { projects, deleteProject } = useProjectsStore()
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
@@ -30,17 +30,18 @@ export default function ProjectsPage() {
       project.categories.some((category) => category.toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
-  const handleDeleteClick = (title: string) => {
-    setProjectToDelete(title)
+  const handleDeleteClick = (id: string) => {
+    setProjectToDelete(id)
     setDeleteDialogOpen(true)
   }
 
   const confirmDelete = () => {
     if (projectToDelete) {
+      const projectTitle = projects.find((p) => p.id === projectToDelete)?.title || "Project"
       deleteProject(projectToDelete)
       toast({
         title: "Project deleted",
-        description: `"${projectToDelete}" has been removed.`,
+        description: `"${projectTitle}" has been removed.`,
       })
       setProjectToDelete(null)
       setDeleteDialogOpen(false)
@@ -83,7 +84,7 @@ export default function ProjectsPage() {
       <DeleteProjectDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
-        projectTitle={projectToDelete}
+        projectId={projectToDelete}
         onConfirm={confirmDelete}
       />
     </div>

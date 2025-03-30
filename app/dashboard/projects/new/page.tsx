@@ -2,24 +2,19 @@
 
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
-import { useProjects } from "@/lib/hooks/use-projects"
-import { useCategories } from "@/lib/hooks/use-categories"
-import { useTags } from "@/lib/hooks/use-tags"
+import { useCategoriesStore } from "@/lib/stores/use-categories-store"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { ProjectForm } from "@/components/project-form"
+import type { CreateProjectInput } from "@/lib/schemas/project"
 
 export default function NewProjectPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { addProject } = useProjects()
-  const { categories } = useCategories()
-  const { tags } = useTags()
+  const { addProject } = useProjectsStore()
+  const { categories } = useCategoriesStore()
 
-  const handleSubmit = (projectData: any) => {
-    addProject({
-      ...projectData,
-      stackblitzUrl: projectData.stackblitzUrl || undefined,
-      codepenUrl: projectData.codepenUrl || undefined,
-    })
+  const handleSubmit = (projectData: CreateProjectInput) => {
+    addProject(projectData)
 
     toast({
       title: "Project created",

@@ -4,14 +4,14 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FolderKanban, Tag, BarChart3, TrendingUp, Clock } from "lucide-react"
-import { useProjects } from "@/lib/hooks/use-projects"
-import { useCategories } from "@/lib/hooks/use-categories"
-import { useTags } from "@/lib/hooks/use-tags"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
+import { useCategoriesStore } from "@/lib/stores/use-categories-store"
+import { useTagsStore } from "@/lib/stores/use-tags-store"
 
 export default function DashboardPage() {
-  const { projects } = useProjects()
-  const { categories } = useCategories()
-  const { tags } = useTags()
+  const { projects } = useProjectsStore()
+  const { categories } = useCategoriesStore()
+  const { tags } = useTagsStore()
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -25,8 +25,8 @@ export default function DashboardPage() {
   const featuredProjects = projects.filter((project) => project.featured)
   const recentProjects = [...projects]
     .sort((a, b) => {
-      // This is a mock sort - in a real app you'd sort by creation date
-      return b.title.localeCompare(a.title)
+      // Sort by creation date, newest first
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
     .slice(0, 5)
 
@@ -107,7 +107,7 @@ export default function DashboardPage() {
               {recentProjects.length > 0 ? (
                 <div className="space-y-4">
                   {recentProjects.map((project) => (
-                    <div key={project.title} className="flex items-center justify-between">
+                    <div key={project.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FolderKanban className="h-5 w-5 text-muted-foreground" />
                         <div>
@@ -119,7 +119,9 @@ export default function DashboardPage() {
                         {project.featured && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Featured</span>
                         )}
-                        <span className="text-xs bg-muted px-2 py-1 rounded-full">{project.categories[0]}</span>
+                        {project.categories[0] && (
+                          <span className="text-xs bg-muted px-2 py-1 rounded-full">{project.categories[0]}</span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -140,7 +142,7 @@ export default function DashboardPage() {
               {featuredProjects.length > 0 ? (
                 <div className="space-y-4">
                   {featuredProjects.map((project) => (
-                    <div key={project.title} className="flex items-center justify-between">
+                    <div key={project.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <FolderKanban className="h-5 w-5 text-muted-foreground" />
                         <div>
@@ -150,7 +152,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Featured</span>
-                        <span className="text-xs bg-muted px-2 py-1 rounded-full">{project.categories[0]}</span>
+                        {project.categories[0] && (
+                          <span className="text-xs bg-muted px-2 py-1 rounded-full">{project.categories[0]}</span>
+                        )}
                       </div>
                     </div>
                   ))}
