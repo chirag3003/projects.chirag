@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
+import { useAuthStore } from "@/lib/stores/use-auth-store"
 
 export default function SettingsPage() {
   const { toast } = useToast()
+  const { user } = useAuthStore()
   const [settings, setSettings] = useState({
     darkMode: true,
     emailNotifications: true,
@@ -111,7 +113,7 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <p className="font-medium">Email Address</p>
-              <p className="text-sm text-muted-foreground">admin@example.com</p>
+              <p className="text-sm text-muted-foreground">{user?.email || "admin@example.com"}</p>
             </div>
             <div className="space-y-1">
               <p className="font-medium">Account Type</p>

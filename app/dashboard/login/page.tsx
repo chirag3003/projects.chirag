@@ -10,12 +10,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useAuthStore } from "@/lib/stores/use-auth-store"
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { login } = useAuth()
+  const { login } = useAuthStore()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -28,17 +28,21 @@ export default function LoginPage() {
     try {
       // For demo purposes, we'll accept any email/password combination
       // In a real app, you would validate against a backend
-      await login(email, password)
+      const success = await login(email, password)
 
-      toast({
-        title: "Login successful",
-        description: "Welcome to the dashboard",
-      })
+      if (success) {
+        toast({
+          title: "Login successful",
+          description: "Welcome to the dashboard",
+        })
 
-      // Add a small delay to ensure the auth state is updated before redirect
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 100)
+        // Add a small delay to ensure the auth state is updated before redirect
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 100)
+      } else {
+        throw new Error("Login failed")
+      }
     } catch (error) {
       toast({
         title: "Login failed",

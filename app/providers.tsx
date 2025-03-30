@@ -2,7 +2,6 @@
 
 import type React from "react"
 
-import { AuthProvider } from "@/lib/hooks/use-auth"
 import { ProjectsProvider } from "@/lib/hooks/use-projects"
 import { CategoriesProvider } from "@/lib/hooks/use-categories"
 import { TagsProvider } from "@/lib/hooks/use-tags"
@@ -18,13 +17,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       // Add suppressHydrationWarning to prevent hydration warnings
       suppressHydrationWarning
     >
-      <AuthProvider>
-        <ProjectsProvider>
-          <CategoriesProvider>
-            <TagsProvider>{children}</TagsProvider>
-          </CategoriesProvider>
-        </ProjectsProvider>
-      </AuthProvider>
+      <ProjectsProvider>
+        <CategoriesProvider>
+          <TagsProvider>{children}</TagsProvider>
+        </CategoriesProvider>
+      </ProjectsProvider>
     </ThemeProvider>
   )
 }

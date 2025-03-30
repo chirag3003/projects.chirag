@@ -7,12 +7,12 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, FolderKanban, Tag, ListFilter, Settings, LogOut, X } from "lucide-react"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useAuthStore } from "@/lib/stores/use-auth-store"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuthStore()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
 
