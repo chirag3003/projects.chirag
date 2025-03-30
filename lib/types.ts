@@ -1,13 +1,13 @@
-export interface Project {
+export interface CodePen {
   title: string
   description: string
-  image: string
+  thumbnail: string
   tags: string[]
   categories: string[]
-  demoUrl: string
-  repoUrl: string
-  stackblitzUrl?: string
-  codepenUrl?: string
+  penUrl: string
   featured?: boolean
+  id: string
+  createdAt: string
+  updatedAt: string
 }
 

@@ -7,56 +7,48 @@ import { ExternalLink, X, User, Code, Briefcase, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { siteConfig } from "@/lib/configs/site"
-import { projects } from "@/lib/configs/projects"
-import { codepens } from "@/lib/configs/codepens"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
+import { useTagsStore } from "@/lib/stores/use-tags-store"
+import { useCategoriesStore } from "@/lib/stores/use-categories-store"
 import ProjectCard from "@/components/project-card"
-import CodePenCard from "@/components/codepen-card"
 import LoadingText from "@/components/loading-text"
 import CategoryFilter from "@/components/category-filter"
-
-// Create a unified type for items
-type Item = ({ type: "project" } & (typeof projects)[0]) | ({ type: "codepen" } & (typeof codepens)[0])
+import type { Project } from "@/lib/schemas/project"
 
 export default function Home() {
-  // Combine projects and codepens with type discriminator
-  const allItems = useMemo(() => {
-    const projectItems = projects.map((project) => ({ ...project, type: "project" as const }))
-    const codepenItems = codepens.map((codepen) => ({ ...codepen, type: "codepen" as const }))
+  const { projects } = useProjectsStore()
+  const { tags } = useTagsStore()
+  const { categories } = useCategoriesStore()
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [visibleItems, setVisibleItems] = useState<Project[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
 
-    // Interleave projects and codepens to ensure mixed content
-    const combined = []
-    const maxLength = Math.max(projectItems.length, codepenItems.length)
-
-    for (let i = 0; i < maxLength; i++) {
-      if (i < projectItems.length) combined.push(projectItems[i])
-      if (i < codepenItems.length) combined.push(codepenItems[i])
-    }
-
-    return combined
+  // Set loading to false after a short delay to ensure stores are loaded
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
   }, [])
 
-  const featuredItems = useMemo(() => allItems.filter((item) => item.featured), [allItems])
+  const featuredItems = useMemo(() => projects.filter((project) => project.featured), [projects])
 
-  const allRegularItems = useMemo(() => allItems.filter((item) => !item.featured), [allItems])
-
-  const ITEMS_PER_PAGE = 6
-  const [visibleItems, setVisibleItems] = useState<typeof allRegularItems>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
+  const allRegularItems = useMemo(() => projects.filter((project) => !project.featured), [projects])
 
   // Extract all unique categories from all items
-  const allCategories = useMemo(() => {
+  const allCategoriesList = useMemo(() => {
     const categoriesSet = new Set<string>()
-    allItems.forEach((item) => {
-      item.categories.forEach((category) => {
+    projects.forEach((project) => {
+      project.categories.forEach((category) => {
         categoriesSet.add(category)
       })
     })
     return Array.from(categoriesSet).sort()
-  }, [allItems])
+  }, [projects])
 
   // Filter items based on selected categories and search term
   const filteredItems = useMemo(() => {
@@ -64,35 +56,43 @@ export default function Home() {
 
     // Apply category filter
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter((item) => item.categories.some((category) => selectedCategories.includes(category)))
+      filtered = filtered.filter((project) =>
+        project.categories.some((category) => selectedCategories.includes(category)),
+      )
     }
 
     // Apply search filter
     if (searchTerm.trim() !== "") {
       const search = searchTerm.toLowerCase().trim()
       filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(search) ||
-          item.description.toLowerCase().includes(search) ||
-          item.tags.some((tag) => tag.toLowerCase().includes(search)),
+        (project) =>
+          project.title.toLowerCase().includes(search) ||
+          project.description.toLowerCase().includes(search) ||
+          project.tags.some((tag) => tag.toLowerCase().includes(search)),
       )
     }
 
     return filtered
   }, [allRegularItems, selectedCategories, searchTerm])
 
+  const ITEMS_PER_PAGE = 6
+
   // Initialize items on first render
   useEffect(() => {
-    setVisibleItems(allRegularItems.slice(0, ITEMS_PER_PAGE))
-    setHasMore(allRegularItems.length > ITEMS_PER_PAGE)
-  }, [allRegularItems])
+    if (!isLoading) {
+      setVisibleItems(filteredItems.slice(0, ITEMS_PER_PAGE))
+      setHasMore(filteredItems.length > ITEMS_PER_PAGE)
+    }
+  }, [filteredItems, isLoading])
 
   // Handle filter changes
   useEffect(() => {
-    setCurrentPage(1)
-    setVisibleItems(filteredItems.slice(0, ITEMS_PER_PAGE))
-    setHasMore(filteredItems.length > ITEMS_PER_PAGE)
-  }, [selectedCategories, searchTerm, filteredItems])
+    if (!isLoading) {
+      setCurrentPage(1)
+      setVisibleItems(filteredItems.slice(0, ITEMS_PER_PAGE))
+      setHasMore(filteredItems.length > ITEMS_PER_PAGE)
+    }
+  }, [selectedCategories, searchTerm, filteredItems, isLoading])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) => {
@@ -118,7 +118,7 @@ export default function Home() {
   }
 
   const loadMoreItems = () => {
-    setIsLoading(true)
+    setIsLoadingMore(true)
 
     // Simulate loading delay
     setTimeout(() => {
@@ -129,7 +129,7 @@ export default function Home() {
 
       setVisibleItems((prev) => [...prev, ...newItems])
       setCurrentPage(nextPage)
-      setIsLoading(false)
+      setIsLoadingMore(false)
 
       // Check if we've loaded all items
       if (endIndex >= filteredItems.length) {
@@ -138,40 +138,16 @@ export default function Home() {
     }, 1500) // 1.5 second delay to show loading animation
   }
 
-  // Render the appropriate card based on item type
-  const renderItem = (item: Item, index: number) => {
-    if (item.type === "project") {
-      return (
-        <ProjectCard
-          key={`project-${index}`}
-          title={item.title}
-          description={item.description}
-          image={item.image}
-          tags={item.tags}
-          demoUrl={item.demoUrl}
-          repoUrl={item.repoUrl}
-          stackblitzUrl={item.stackblitzUrl}
-          featured={item.featured}
-        />
-      )
-    } else {
-      return (
-        <CodePenCard
-          key={`codepen-${index}`}
-          title={item.title}
-          description={item.description}
-          thumbnail={item.thumbnail}
-          tags={item.tags}
-          penUrl={item.penUrl}
-          featured={item.featured}
-        />
-      )
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingText />
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-background pt-14">
-      {" "}
       {/* Add padding-top equal to header height */}
       <main className="container max-w-screen-2xl px-4 sm:px-6 py-6 md:py-12">
         {/* Combined Hero & Bio Section */}
@@ -235,7 +211,20 @@ export default function Home() {
                 <p className="text-muted-foreground">Highlighted projects and CodePens I've created</p>
               </div>
               <div className="grid w-full gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8">
-                {featuredItems.map((item, index) => renderItem(item, index))}
+                {featuredItems.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description}
+                    image={project.image}
+                    tags={project.tags}
+                    demoUrl={project.demoUrl}
+                    repoUrl={project.repoUrl}
+                    stackblitzUrl={project.stackblitzUrl}
+                    codepenUrl={project.codepenUrl}
+                    featured={project.featured}
+                  />
+                ))}
               </div>
             </div>
           </section>
@@ -289,7 +278,7 @@ export default function Home() {
                 )}
               </div>
               <CategoryFilter
-                categories={allCategories}
+                categories={allCategoriesList}
                 selectedCategories={selectedCategories}
                 toggleCategory={toggleCategory}
               />
@@ -297,7 +286,20 @@ export default function Home() {
 
             <div className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 sm:gap-6 lg:gap-8">
               {visibleItems.length > 0 ? (
-                visibleItems.map((item, index) => renderItem(item, index))
+                visibleItems.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description}
+                    image={project.image}
+                    tags={project.tags}
+                    demoUrl={project.demoUrl}
+                    repoUrl={project.repoUrl}
+                    stackblitzUrl={project.stackblitzUrl}
+                    codepenUrl={project.codepenUrl}
+                    featured={project.featured}
+                  />
+                ))
               ) : (
                 <div className="col-span-full py-12 text-center">
                   <p className="text-muted-foreground">
@@ -313,9 +315,9 @@ export default function Home() {
             </div>
 
             {/* Load More Section */}
-            {(hasMore || isLoading) && visibleItems.length > 0 && (
+            {(hasMore || isLoadingMore) && visibleItems.length > 0 && (
               <div className="w-full flex flex-col items-center justify-center py-8 mt-4">
-                {isLoading ? (
+                {isLoadingMore ? (
                   <div className="flex flex-col items-center space-y-4">
                     <LoadingText />
                     <p className="text-muted-foreground text-sm">Loading more items...</p>

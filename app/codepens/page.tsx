@@ -6,22 +6,38 @@ import { X, Code, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { codepens } from "@/lib/configs/codepens"
 import LoadingText from "@/components/loading-text"
 import CategoryFilter from "@/components/category-filter"
-import CodePenCard from "@/components/codepen-card"
+import ProjectCard from "@/components/project-card"
+import { useProjectsStore } from "@/lib/stores/use-projects-store"
 
 export default function CodePensPage() {
-  const featuredPens = useMemo(() => codepens.filter((pen) => pen.featured), [])
-  const allRegularPens = useMemo(() => codepens.filter((pen) => !pen.featured), [])
+  const { projects } = useProjectsStore()
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [visiblePens, setVisiblePens] = useState<typeof projects>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+
+  // Filter projects to only include those with a codepenUrl
+  const codepens = useMemo(() => {
+    return projects.filter((project) => project.codepenUrl)
+  }, [projects])
+
+  // Set loading to false after a short delay to ensure stores are loaded
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const featuredPens = useMemo(() => codepens.filter((pen) => pen.featured), [codepens])
+  const allRegularPens = useMemo(() => codepens.filter((pen) => !pen.featured), [codepens])
 
   const PENS_PER_PAGE = 6
-  const [visiblePens, setVisiblePens] = useState<typeof allRegularPens>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
 
   // Extract all unique categories from codepens
   const allCategories = useMemo(() => {
@@ -32,7 +48,7 @@ export default function CodePensPage() {
       })
     })
     return Array.from(categoriesSet).sort()
-  }, [])
+  }, [codepens])
 
   // Filter codepens based on selected categories and search term
   const filteredPens = useMemo(() => {
@@ -59,17 +75,20 @@ export default function CodePensPage() {
 
   // Initialize codepens on first render
   useEffect(() => {
-    setVisiblePens(allRegularPens.slice(0, PENS_PER_PAGE))
-    setHasMore(allRegularPens.length > PENS_PER_PAGE)
-  }, [allRegularPens])
+    if (!isLoading) {
+      setVisiblePens(filteredPens.slice(0, PENS_PER_PAGE))
+      setHasMore(filteredPens.length > PENS_PER_PAGE)
+    }
+  }, [filteredPens, isLoading])
 
   // Handle filter changes
   useEffect(() => {
-    // Only update if selectedCategories changes
-    setCurrentPage(1)
-    setVisiblePens(filteredPens.slice(0, PENS_PER_PAGE))
-    setHasMore(filteredPens.length > PENS_PER_PAGE)
-  }, [selectedCategories, searchTerm, filteredPens])
+    if (!isLoading) {
+      setCurrentPage(1)
+      setVisiblePens(filteredPens.slice(0, PENS_PER_PAGE))
+      setHasMore(filteredPens.length > PENS_PER_PAGE)
+    }
+  }, [selectedCategories, searchTerm, filteredPens, isLoading])
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) => {
@@ -95,7 +114,7 @@ export default function CodePensPage() {
   }
 
   const loadMorePens = () => {
-    setIsLoading(true)
+    setIsLoadingMore(true)
 
     // Simulate loading delay
     setTimeout(() => {
@@ -106,13 +125,21 @@ export default function CodePensPage() {
 
       setVisiblePens((prev) => [...prev, ...newPens])
       setCurrentPage(nextPage)
-      setIsLoading(false)
+      setIsLoadingMore(false)
 
       // Check if we've loaded all codepens
       if (endIndex >= filteredPens.length) {
         setHasMore(false)
       }
     }, 1500) // 1.5 second delay to show loading animation
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingText />
+      </div>
+    )
   }
 
   return (
@@ -150,15 +177,18 @@ export default function CodePensPage() {
                 <p className="text-muted-foreground">Highlighted CodePen experiments and demos</p>
               </div>
               <div className="grid w-full gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8">
-                {featuredPens.map((pen, index) => (
-                  <CodePenCard
-                    key={index}
-                    title={pen.title}
-                    description={pen.description}
-                    thumbnail={pen.thumbnail}
-                    tags={pen.tags}
-                    penUrl={pen.penUrl}
-                    featured
+                {featuredPens.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description}
+                    image={project.image}
+                    tags={project.tags}
+                    demoUrl={project.demoUrl}
+                    repoUrl={project.repoUrl}
+                    stackblitzUrl={project.stackblitzUrl}
+                    codepenUrl={project.codepenUrl}
+                    featured={project.featured}
                   />
                 ))}
               </div>
@@ -222,14 +252,18 @@ export default function CodePensPage() {
 
             <div className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 sm:gap-6 lg:gap-8">
               {visiblePens.length > 0 ? (
-                visiblePens.map((pen, index) => (
-                  <CodePenCard
-                    key={index}
-                    title={pen.title}
-                    description={pen.description}
-                    thumbnail={pen.thumbnail}
-                    tags={pen.tags}
-                    penUrl={pen.penUrl}
+                visiblePens.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    title={project.title}
+                    description={project.description}
+                    image={project.image}
+                    tags={project.tags}
+                    demoUrl={project.demoUrl}
+                    repoUrl={project.repoUrl}
+                    stackblitzUrl={project.stackblitzUrl}
+                    codepenUrl={project.codepenUrl}
+                    featured={project.featured}
                   />
                 ))
               ) : (
@@ -247,9 +281,9 @@ export default function CodePensPage() {
             </div>
 
             {/* Load More Section */}
-            {(hasMore || isLoading) && visiblePens.length > 0 && (
+            {(hasMore || isLoadingMore) && visiblePens.length > 0 && (
               <div className="w-full flex flex-col items-center justify-center py-8 mt-4">
-                {isLoading ? (
+                {isLoadingMore ? (
                   <div className="flex flex-col items-center space-y-4">
                     <LoadingText />
                     <p className="text-muted-foreground text-sm">Loading amazing CodePens...</p>
