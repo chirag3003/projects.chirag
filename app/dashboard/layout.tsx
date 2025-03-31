@@ -73,7 +73,7 @@ export default function DashboardLayout({
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { name: "Categories", href: "/dashboard/categories", icon: ListFilter },
-    { name: "Tags", href: "/dashboard/tags", icon: Tag },
+    // { name: "Tags", href: "/dashboard/tags", icon: Tag },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
