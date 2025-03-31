@@ -1,60 +1,73 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { LayoutDashboard, FolderKanban, Tag, ListFilter, Settings, LogOut, X } from "lucide-react"
-import { useAuthStore } from "@/lib/stores/use-auth-store"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Tag,
+  ListFilter,
+  Settings,
+  LogOut,
+  X,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/stores/use-auth-store";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout } = useAuthStore()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout, loading } = useAuthStore();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Check if mobile on mount and when window resizes
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(window.innerWidth < 768);
       if (window.innerWidth < 768) {
-        setIsSidebarOpen(false)
+        setIsSidebarOpen(false);
       } else {
-        setIsSidebarOpen(true)
+        setIsSidebarOpen(true);
       }
-    }
+    };
 
     // Initial check
-    checkIfMobile()
+    checkIfMobile();
 
     // Add event listener
-    window.addEventListener("resize", checkIfMobile)
+    window.addEventListener("resize", checkIfMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile)
-  }, [])
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   // Redirect to login if not authenticated
   useEffect(() => {
+    if (loading) return;
     if (!user && pathname !== "/dashboard/login") {
-      router.push("/dashboard/login")
+      router.push("/dashboard/login");
     }
-  }, [user, pathname, router])
+  }, [user, pathname, router, loading]);
 
   // Close sidebar when navigating on mobile
   useEffect(() => {
     if (isMobile) {
-      setIsSidebarOpen(false)
+      setIsSidebarOpen(false);
     }
-  }, [pathname, isMobile])
+  }, [pathname, isMobile]);
 
   const handleLogout = () => {
-    logout()
-    router.push("/dashboard/login")
-  }
+    logout();
+    router.push("/dashboard/login");
+  };
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -62,11 +75,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Categories", href: "/dashboard/categories", icon: ListFilter },
     { name: "Tags", href: "/dashboard/tags", icon: Tag },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
-  ]
+  ];
 
   // If on login page, just show the login form
   if (pathname === "/dashboard/login") {
-    return <div className="min-h-screen">{children}</div>
+    return <div className="min-h-screen">{children}</div>;
+  }
+
+  if (loading) {
+    return <> </>;
   }
 
   return (
@@ -93,7 +110,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.name}
@@ -105,12 +123,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }`}
                 >
                   <item.icon
-                    className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`}
+                    className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                      isActive
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground"
+                    }`}
                     aria-hidden="true"
                   />
                   {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
 
@@ -118,9 +140,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="border-t border-border p-4">
             <div className="flex flex-col space-y-3">
               <div className="text-sm text-muted-foreground">
-                Logged in as <span className="font-medium text-foreground">{user?.name || "User"}</span>
+                Logged in as{" "}
+                <span className="font-medium text-foreground">
+                  {user?.name || "User"}
+                </span>
               </div>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="w-full justify-start">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="w-full justify-start"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -141,10 +171,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden w-full">
         <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-full">
-          <div className="mx-auto w-full max-w-full overflow-x-hidden">{children}</div>
+          <div className="mx-auto w-full max-w-full overflow-x-hidden">
+            {children}
+          </div>
         </main>
       </div>
     </div>
-  )
+  );
 }
-

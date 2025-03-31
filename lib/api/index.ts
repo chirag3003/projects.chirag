@@ -6,8 +6,8 @@ import { User } from "./user";
 class Api {
   private readonly _axios: Axios;
   auth: Auth;
-  projects: Projects
-  user: User
+  projects: Projects;
+  user: User;
 
   constructor() {
     this._axios = this.createAxios();
@@ -17,9 +17,22 @@ class Api {
   }
 
   private createAxios() {
-    return axios.create({
+    const ax = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL,
     });
+
+    ax.interceptors.request.use((config) => {
+      if(typeof window === "undefined") {
+        return config;
+      }
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers['authorization'] = `${token}`;
+      }
+      return config;
+    });
+
+    return ax;
   }
 
   getAxios() {

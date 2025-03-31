@@ -1,61 +1,71 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { PlusCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { useProjectsStore } from "@/lib/stores/use-projects-store"
-import { ProjectSearch } from "@/components/dashboard/project-search"
-import { ProjectListView } from "@/components/dashboard/project-list-view"
-import { ProjectGridView } from "@/components/dashboard/project-grid-view"
-import { DeleteProjectDialog } from "@/components/dashboard/delete-project-dialog"
-import { ViewToggle } from "@/components/dashboard/view-toggle"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useProjectsStore } from "@/lib/stores/use-projects-store";
+import { ProjectSearch } from "@/components/dashboard/project-search";
+import { ProjectListView } from "@/components/dashboard/project-list-view";
+import { ProjectGridView } from "@/components/dashboard/project-grid-view";
+import { DeleteProjectDialog } from "@/components/dashboard/delete-project-dialog";
+import { ViewToggle } from "@/components/dashboard/view-toggle";
+import { useProjects } from "@/hooks/project.hooks";
 
 export default function ProjectsPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const { projects, deleteProject } = useProjectsStore()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list")
-
-  const filteredProjects = projects.filter(
+  const router = useRouter();
+  const { toast } = useToast();
+  const { deleteProject } = useProjectsStore();
+  const { data: projects ,fetchStatus} = useProjects();
+  console.log(fetchStatus, 'fetchStatus')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  console.log(projects, 'projects')
+  const filteredProjects = projects?.filter(
     (project) =>
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      project.categories.some((category) => category.toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+      project.tags.some((tag) =>
+        tag.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ||
+      project.categories.some((category) =>
+        category.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+  );
 
   const handleDeleteClick = (id: string) => {
-    setProjectToDelete(id)
-    setDeleteDialogOpen(true)
-  }
+    setProjectToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
   const confirmDelete = () => {
     if (projectToDelete) {
-      const projectTitle = projects.find((p) => p.id === projectToDelete)?.title || "Project"
-      deleteProject(projectToDelete)
+      const projectTitle =
+        projects?.find((p) => p.id === projectToDelete)?.title || "Project";
+      deleteProject(projectToDelete);
       toast({
         title: "Project deleted",
         description: `"${projectTitle}" has been removed.`,
-      })
-      setProjectToDelete(null)
-      setDeleteDialogOpen(false)
+      });
+      setProjectToDelete(null);
+      setDeleteDialogOpen(false);
     }
-  }
+  };
 
-  const clearSearch = () => setSearchTerm("")
+  const clearSearch = () => setSearchTerm("");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground">Manage your portfolio projects</p>
+          <p className="text-muted-foreground">
+            Manage your portfolio projects
+          </p>
         </div>
         <Button asChild>
           <Link href="/dashboard/projects/new">
@@ -71,10 +81,14 @@ export default function ProjectsPage() {
       </div>
 
       {viewMode === "list" ? (
-        <ProjectListView projects={filteredProjects} searchTerm={searchTerm} onDeleteClick={handleDeleteClick} />
+        <ProjectListView
+          projects={filteredProjects ?? []}
+          searchTerm={searchTerm}
+          onDeleteClick={handleDeleteClick}
+        />
       ) : (
         <ProjectGridView
-          projects={filteredProjects}
+          projects={filteredProjects ?? []}
           searchTerm={searchTerm}
           onDeleteClick={handleDeleteClick}
           clearSearch={clearSearch}
@@ -88,6 +102,5 @@ export default function ProjectsPage() {
         onConfirm={confirmDelete}
       />
     </div>
-  )
+  );
 }
-

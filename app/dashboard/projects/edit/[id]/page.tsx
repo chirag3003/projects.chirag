@@ -7,7 +7,7 @@ import { useCategoriesStore } from "@/lib/stores/use-categories-store"
 import { useProjectsStore } from "@/lib/stores/use-projects-store"
 import { Loader2 } from "lucide-react"
 import { ProjectForm } from "@/components/project-form"
-import type { CreateProjectInput } from "@/lib/schemas/project"
+import { CreateProjectInput } from "@/lib/validators/project.schema"
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   const router = useRouter()

@@ -13,8 +13,13 @@ export const createProjectSchema = z.object({
   stackblitzUrl: z
     .string()
     .url("Stackblitz URL must be a valid URL")
-    .optional(),
-  codepenUrl: z.string().url("Codepen URL must be a valid URL").optional(),
+    .optional()
+    .or(z.literal("")),
+  codepenUrl: z
+    .string()
+    .url("Codepen URL must be a valid URL")
+    .optional()
+    .or(z.literal("")),
   featured: z.boolean().optional().default(false),
 });
 

@@ -13,8 +13,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast"
 import { TagInput } from "@/components/tag-input"
 import { CategorySelector } from "@/components/category-selector"
-import { createProjectSchema, type CreateProjectInput } from "@/lib/schemas/project"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { CreateProjectInput, createProjectSchema } from "@/lib/validators/project.schema"
 
 interface ProjectFormProps {
   initialData?: Partial<CreateProjectInput>
@@ -44,7 +44,7 @@ export function ProjectForm({
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",
-      image: initialData?.image || "/placeholder.svg?height=400&width=600",
+      image: initialData?.image || "https://chirag-experiment.s3.ap-south-1.amazonaws.com/images/QgSuYM792ebraden-jarvis-prSogOoFmkw-unsplash.jpg",
       demoUrl: initialData?.demoUrl || "https://example.com",
       repoUrl: initialData?.repoUrl || "https://github.com",
       stackblitzUrl: initialData?.stackblitzUrl || "",
@@ -54,6 +54,7 @@ export function ProjectForm({
       categories: initialData?.categories || [],
     },
   })
+  console.log(form.formState.errors)  
 
   const handleEmbedTypeChange = (type: "none" | "stackblitz" | "codepen") => {
     setEmbedType(type)
@@ -326,7 +327,7 @@ export function ProjectForm({
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => router.push("/dashboard/projects")}>
+            <Button type="submit" variant="outline" onClick={() => router.push("/dashboard/projects")}>
               Cancel
             </Button>
             <Button type="submit">{submitButtonText}</Button>

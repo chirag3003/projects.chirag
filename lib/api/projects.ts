@@ -13,17 +13,19 @@ export class Projects {
     this.axios = axios;
   }
 
-  async getProjects(): Promise<ProjectsResp> {
-    const { data } = await this.axios.get("/projects");
-    return projectsRespSchema.parse(data);
+  async getProjects() {
+    const { data } = await this.axios.get("/project");
+    const resp = projectsRespSchema.parse(data);
+    return resp.projects;
   }
 
-  async getProject(id: string): Promise<ProjectResp> {
-    const { data } = await this.axios.get(`/projects/${id}`);
-    return projectRespSchema.parse(data);
+  async getProject(id: string) {
+    const { data } = await this.axios.get(`/project/${id}`);
+    const resp =  projectRespSchema.parse(data);
+    return resp.project
   }
 
   async createProject(input: CreateProjectInput): Promise<void> {
-    await this.axios.post("/projects", input);
+    await this.axios.post("/project", input);
   }
 }
