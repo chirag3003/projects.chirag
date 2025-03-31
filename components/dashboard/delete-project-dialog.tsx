@@ -10,18 +10,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useProjectsStore } from "@/lib/stores/use-projects-store"
+import { useProject } from "@/hooks/project.hooks"
 
 interface DeleteProjectDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  projectId: string | null
+  projectId: string
   onConfirm: () => void
 }
 
 export function DeleteProjectDialog({ open, onOpenChange, projectId, onConfirm }: DeleteProjectDialogProps) {
-  const { getProjectById } = useProjectsStore()
-  const project = projectId ? getProjectById(projectId) : null
+  const {data: project} = useProject(projectId)
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

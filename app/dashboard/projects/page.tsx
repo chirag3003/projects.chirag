@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useProjectsStore } from "@/lib/stores/use-projects-store";
 import { ProjectSearch } from "@/components/dashboard/project-search";
 import { ProjectListView } from "@/components/dashboard/project-list-view";
 import { ProjectGridView } from "@/components/dashboard/project-grid-view";
@@ -92,12 +90,15 @@ export default function ProjectsPage() {
         />
       )}
 
-      <DeleteProjectDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        projectId={projectToDelete}
-        onConfirm={confirmDelete}
-      />
+      {projectToDelete && (
+        <DeleteProjectDialog
+          key={projectToDelete}
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          projectId={projectToDelete}
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 }
