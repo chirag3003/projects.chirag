@@ -12,7 +12,7 @@ export class Auth {
     this.axios = axios;
   }
   async login(input: LoginInput): Promise<void> {
-    this.axios.post("/auth/login", input);
+    await this.axios.post("/auth/login", input);
   }
 
   async verifyOtp(input: VerifyOtpInput): Promise<VerifyResp> {
