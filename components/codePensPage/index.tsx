@@ -16,37 +16,14 @@ interface CodePensPageProps {
 }
 
 export default function CodePensPage({ projects }: CodePensPageProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [visiblePens, setVisiblePens] = useState<Project[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
-  // Filter projects to only include those with a codepenUrl
-  const codepens = useMemo(() => {
-    return projects.filter((project) => project.codepenUrl);
-  }, [projects]);
+// Filter projects to only include those with a codepenUrl
+const codepens = projects.filter((project) => project.codepenUrl);
 
-  // Set loading to false after a short delay to ensure stores are loaded
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const featuredPens = useMemo(
-    () => codepens.filter((pen) => pen.featured),
-    [codepens]
-  );
-  const allRegularPens = useMemo(
-    () => codepens.filter((pen) => !pen.featured),
-    [codepens]
-  );
-
-  const PENS_PER_PAGE = 6;
+const featuredPens = codepens.filter((pen) => pen.featured);
+const allRegularPens = codepens.filter((pen) => !pen.featured);
 
   // Extract all unique categories from codepens
   const allCategories = useMemo(() => {
@@ -84,23 +61,6 @@ export default function CodePensPage({ projects }: CodePensPageProps) {
     return filtered;
   }, [allRegularPens, selectedCategories, searchTerm]);
 
-  // Initialize codepens on first render
-  useEffect(() => {
-    if (!isLoading) {
-      setVisiblePens(filteredPens.slice(0, PENS_PER_PAGE));
-      setHasMore(filteredPens.length > PENS_PER_PAGE);
-    }
-  }, [filteredPens, isLoading]);
-
-  // Handle filter changes
-  useEffect(() => {
-    if (!isLoading) {
-      setCurrentPage(1);
-      setVisiblePens(filteredPens.slice(0, PENS_PER_PAGE));
-      setHasMore(filteredPens.length > PENS_PER_PAGE);
-    }
-  }, [selectedCategories, searchTerm, filteredPens, isLoading]);
-
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) => {
       if (prev.includes(category)) {
@@ -111,10 +71,6 @@ export default function CodePensPage({ projects }: CodePensPageProps) {
     });
   };
 
-  const clearCategories = () => {
-    setSelectedCategories([]);
-  };
-
   const clearSearch = () => {
     setSearchTerm("");
   };
@@ -123,35 +79,6 @@ export default function CodePensPage({ projects }: CodePensPageProps) {
     setSelectedCategories([]);
     setSearchTerm("");
   };
-
-  const loadMorePens = () => {
-    setIsLoadingMore(true);
-
-    // Simulate loading delay
-    setTimeout(() => {
-      const nextPage = currentPage + 1;
-      const startIndex = currentPage * PENS_PER_PAGE;
-      const endIndex = nextPage * PENS_PER_PAGE;
-      const newPens = filteredPens.slice(startIndex, endIndex);
-
-      setVisiblePens((prev) => [...prev, ...newPens]);
-      setCurrentPage(nextPage);
-      setIsLoadingMore(false);
-
-      // Check if we've loaded all codepens
-      if (endIndex >= filteredPens.length) {
-        setHasMore(false);
-      }
-    }, 1500); // 1.5 second delay to show loading animation
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingText />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background pt-14">
@@ -273,8 +200,8 @@ export default function CodePensPage({ projects }: CodePensPageProps) {
             </div>
 
             <div className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 sm:gap-6 lg:gap-8">
-              {visiblePens.length > 0 ? (
-                visiblePens.map((project) => (
+              {filteredPens.length > 0 ? (
+                filteredPens.map((project) => (
                   <ProjectCard
                     key={project.id}
                     title={project.title}
@@ -310,29 +237,6 @@ export default function CodePensPage({ projects }: CodePensPageProps) {
                 </div>
               )}
             </div>
-
-            {/* Load More Section */}
-            {(hasMore || isLoadingMore) && visiblePens.length > 0 && (
-              <div className="w-full flex flex-col items-center justify-center py-8 mt-4">
-                {isLoadingMore ? (
-                  <div className="flex flex-col items-center space-y-4">
-                    <LoadingText />
-                    <p className="text-muted-foreground text-sm">
-                      Loading amazing CodePens...
-                    </p>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={loadMorePens}
-                    variant="outline"
-                    size="lg"
-                    className="min-w-[200px]"
-                  >
-                    Load More CodePens
-                  </Button>
-                )}
-              </div>
-            )}
           </div>
         </section>
       </main>
