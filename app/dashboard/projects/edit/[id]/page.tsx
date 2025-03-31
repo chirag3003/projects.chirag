@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { useCategoriesStore } from "@/lib/stores/use-categories-store";
 import { Loader2 } from "lucide-react";
 import { ProjectForm } from "@/components/project-form";
 import { CreateProjectInput } from "@/lib/validators/project.schema";
 import { useProject, useUpdateProject } from "@/hooks/project.hooks";
+import { useCategories } from "@/hooks/category.hooks";
 
 export default function EditProjectPage({
   params,
@@ -19,7 +19,7 @@ export default function EditProjectPage({
   const { toast } = useToast();
 
   const { mutateAsync: updateProject } = useUpdateProject(id);
-  const { categories } = useCategoriesStore();
+  const { data: categories } = useCategories();
 
   const { data: project, isLoading } = useProject(id);
 
@@ -74,7 +74,7 @@ export default function EditProjectPage({
 
       <ProjectForm
         initialData={project}
-        categories={categories}
+        categories={categories?.map((cat) => cat.name) || []}
         onSubmit={handleSubmit}
         submitButtonText="Update Project"
         title="Project Details"

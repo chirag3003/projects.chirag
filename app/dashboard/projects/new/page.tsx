@@ -2,17 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { useCategoriesStore } from "@/lib/stores/use-categories-store";
-import { useProjectsStore } from "@/lib/stores/use-projects-store";
 import { ProjectForm } from "@/components/project-form";
 import { useCreateProject } from "@/hooks/project.hooks";
 import { CreateProjectInput } from "@/lib/validators/project.schema";
+import { useCategories } from "@/hooks/category.hooks";
 
 export default function NewProjectPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { mutateAsync: addProject } = useCreateProject();
-  const { categories } = useCategoriesStore();
+  const { data: categories } = useCategories();
 
   const handleSubmit = async (projectData: CreateProjectInput) => {
     try {
@@ -42,7 +41,7 @@ export default function NewProjectPage() {
       </div>
 
       <ProjectForm
-        categories={categories}
+        categories={categories?.map(cat => cat.name) || []}
         onSubmit={handleSubmit}
         submitButtonText="Create Project"
         title="Project Details"
