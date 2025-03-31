@@ -2,18 +2,21 @@ import axios, { Axios } from "axios";
 import { Auth } from "./auth";
 import { Projects } from "./projects";
 import { User } from "./user";
+import { Category } from "./category";
 
 class Api {
   private readonly _axios: Axios;
   auth: Auth;
   projects: Projects;
   user: User;
+  category: Category;
 
   constructor() {
     this._axios = this.createAxios();
     this.auth = new Auth(this._axios);
     this.projects = new Projects(this._axios);
     this.user = new User(this._axios);
+    this.category = new Category(this._axios);
   }
 
   private createAxios() {
@@ -22,12 +25,12 @@ class Api {
     });
 
     ax.interceptors.request.use((config) => {
-      if(typeof window === "undefined") {
+      if (typeof window === "undefined") {
         return config;
       }
       const token = localStorage.getItem("token");
       if (token) {
-        config.headers['authorization'] = `${token}`;
+        config.headers["authorization"] = `${token}`;
       }
       return config;
     });

@@ -1,18 +1,38 @@
-"use client"
+"use client";
 
-import { Tag, TagIcon, Search, Pencil, Trash2, ChevronDown } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  Tag,
+  TagIcon,
+  Search,
+  Pencil,
+  Trash2,
+  ChevronDown,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CategoriesResp, Category } from "@/lib/validators/category.schema";
 
 interface ItemListViewProps {
-  items: string[]
-  searchTerm: string
-  itemType: "category" | "tag"
-  getUsageCount: (item: string) => number
-  onEditClick: (item: string) => void
-  onDeleteClick: (item: string) => void
-  onAddClick: () => void
+  items: CategoriesResp["categories"];
+  searchTerm: string;
+  itemType: "category" | "tag";
+  getUsageCount: (item: string) => number;
+  onEditClick: (item: string) => void;
+  onDeleteClick: (category: Category) => void;
+  onAddClick: () => void;
 }
 
 export function ItemListView({
@@ -24,16 +44,18 @@ export function ItemListView({
   onDeleteClick,
   onAddClick,
 }: ItemListViewProps) {
-  const IconComponent = itemType === "category" ? Tag : TagIcon
-  const itemTypeName = itemType === "category" ? "category" : "tag"
-  const itemTypeNamePlural = itemType === "category" ? "categories" : "tags"
+  const IconComponent = itemType === "category" ? Tag : TagIcon;
+  const itemTypeName = itemType === "category" ? "category" : "tag";
+  const itemTypeNamePlural = itemType === "category" ? "categories" : "tags";
 
   return (
     <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{itemType === "category" ? "Category Name" : "Tag Name"}</TableHead>
+            <TableHead>
+              {itemType === "category" ? "Category Name" : "Tag Name"}
+            </TableHead>
             <TableHead className="w-[100px] text-center">Usage</TableHead>
             <TableHead className="w-[100px] text-right">Actions</TableHead>
           </TableRow>
@@ -41,14 +63,16 @@ export function ItemListView({
         <TableBody>
           {items.length > 0 ? (
             items.map((item) => (
-              <TableRow key={item}>
+              <TableRow key={item.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
                     <IconComponent className="h-4 w-4 text-muted-foreground" />
-                    <span>{item}</span>
+                    <span>{item.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center">{getUsageCount(item)}</TableCell>
+                <TableCell className="text-center">
+                  {getUsageCount(item.name)}
+                </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -58,7 +82,7 @@ export function ItemListView({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditClick(item)}>
+                      <DropdownMenuItem onClick={() => onEditClick(item.id)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
@@ -89,7 +113,11 @@ export function ItemListView({
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <IconComponent className="h-8 w-8 mb-2" />
                     <p>No {itemTypeNamePlural} found</p>
-                    <Button variant="link" onClick={onAddClick} className="mt-2">
+                    <Button
+                      variant="link"
+                      onClick={onAddClick}
+                      className="mt-2"
+                    >
                       Add your first {itemTypeName}
                     </Button>
                   </div>
@@ -100,6 +128,5 @@ export function ItemListView({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-
