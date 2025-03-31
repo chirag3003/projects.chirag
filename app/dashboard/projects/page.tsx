@@ -12,19 +12,16 @@ import { ProjectListView } from "@/components/dashboard/project-list-view";
 import { ProjectGridView } from "@/components/dashboard/project-grid-view";
 import { DeleteProjectDialog } from "@/components/dashboard/delete-project-dialog";
 import { ViewToggle } from "@/components/dashboard/view-toggle";
-import { useProjects } from "@/hooks/project.hooks";
+import { useDeleteProject, useProjects } from "@/hooks/project.hooks";
 
 export default function ProjectsPage() {
-  const router = useRouter();
   const { toast } = useToast();
-  const { deleteProject } = useProjectsStore();
-  const { data: projects ,fetchStatus} = useProjects();
-  console.log(fetchStatus, 'fetchStatus')
+  const { mutateAsync: deleteProject } = useDeleteProject();
+  const { data: projects } = useProjects();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  console.log(projects, 'projects')
   const filteredProjects = projects?.filter(
     (project) =>
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

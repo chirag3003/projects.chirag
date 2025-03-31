@@ -1,6 +1,11 @@
 import api from "@/lib/api";
 import { CreateProjectInput } from "@/lib/validators/project.schema";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 export const useProjects = () => {
   console.log("fetching");
@@ -24,5 +29,26 @@ export const useCreateProject = () => {
     mutationKey: ["projects"],
     mutationFn: (input: CreateProjectInput) =>
       api.projects.createProject(input),
+  });
+};
+
+export const useUpdateProject = (id: string) => {
+  return useMutation({
+    mutationKey: ["projects"],
+    mutationFn: (input: CreateProjectInput) =>
+      api.projects.updateProject(input, id),
+  });
+};
+
+export const useDeleteProject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["projects"],
+    mutationFn: (id: string) => api.projects.deleteProject(id),
+    onSettled: (query) => {
+      queryClient.invalidateQueries({
+        queryKey: ["projects"],
+      });
+    },
   });
 };

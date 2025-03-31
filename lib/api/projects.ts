@@ -21,11 +21,19 @@ export class Projects {
 
   async getProject(id: string) {
     const { data } = await this.axios.get(`/project/${id}`);
-    const resp =  projectRespSchema.parse(data);
-    return resp.project
+    const resp = projectRespSchema.parse(data);
+    return resp.project;
   }
 
   async createProject(input: CreateProjectInput): Promise<void> {
     await this.axios.post("/project", input);
+  }
+
+  async updateProject(input: CreateProjectInput, id: string): Promise<void> {
+    await this.axios.put(`/project/${id}`, input);
+  }
+
+  async deleteProject(id: string): Promise<void> {
+    await this.axios.delete(`/project/${id}`);
   }
 }
