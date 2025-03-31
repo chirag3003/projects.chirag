@@ -18,10 +18,13 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/lib/hooks/use-toast";
 import { useLogin, useVerifyOtp } from "@/hooks/auth.hooks";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useAuthStore } from "@/lib/stores/use-auth-store";
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuthStore();
   const { mutateAsync } = useLogin();
   const { mutateAsync: verifyOtp } = useVerifyOtp();
   const [email, setEmail] = useState("");
@@ -34,9 +37,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      console.log('here')
       await mutateAsync({ email });
-      console.log('also here')
       toast({
         title: "OTP sent",
         description: "Check your email for the OTP",
@@ -58,12 +59,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await verifyOtp({ email, code: otp });
+      const { user, token } = await verifyOtp({ email, code: otp });
 
       toast({
         title: "Login successful",
         description: "Welcome to the dashboard",
       });
+
+      login(user, token);
 
       setTimeout(() => {
         router.push("/dashboard");
