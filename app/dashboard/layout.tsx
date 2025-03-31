@@ -94,7 +94,7 @@ export default function DashboardLayout({
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col overflow-y-auto">
+        <div className="flex h-full flex-col overflow-y-auto pt-14">
           <div className="flex h-16 items-center justify-between px-4 border-b border-border">
             <h1 className="text-xl font-bold">Dashboard</h1>
             <Button
@@ -170,7 +170,7 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden w-full">
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-full">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-full md:pt-20">
           <div className="mx-auto w-full max-w-full overflow-x-hidden">
             {children}
           </div>
