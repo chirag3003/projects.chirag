@@ -12,18 +12,21 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Category } from "@/lib/validators/category.schema"
 
 interface EditItemDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  itemName: string | null
+  item: Category | null
   itemType: "category" | "tag"
   onSave: (oldName: string, newName: string) => void
 }
 
-export function EditItemDialog({ open, onOpenChange, itemName, itemType, onSave }: EditItemDialogProps) {
+export function EditItemDialog({ open, onOpenChange, item, itemType, onSave }: EditItemDialogProps) {
   const [newName, setNewName] = useState("")
   const itemTypeName = itemType === "category" ? "Category" : "Tag"
+
+  const itemName = item?.name
 
   useEffect(() => {
     if (open && itemName) {

@@ -21,6 +21,20 @@ export const useCreateCategory = () => {
   });
 };
 
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["categories"],
+    mutationFn: (data: { name: string; id: string }) =>
+      api.category.updateCategory(data.name, data.id),
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+    },
+  });
+};
+
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({

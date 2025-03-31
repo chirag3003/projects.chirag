@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { useCategoriesStore } from "@/lib/stores/use-categories-store";
-import { useProjectsStore } from "@/lib/stores/use-projects-store";
 import { ItemSearch } from "@/components/dashboard/item-search";
 import { ItemListView } from "@/components/dashboard/item-list-view";
 import { DeleteItemDialog } from "@/components/dashboard/delete-item-dialog";
@@ -16,23 +14,25 @@ import {
   useCategories,
   useCreateCategory,
   useDeleteCategory,
+  useUpdateCategory,
 } from "@/hooks/category.hooks";
 import { Category } from "@/lib/validators/category.schema";
+import { useProjects } from "@/hooks/project.hooks";
 
 export default function CategoriesPage() {
   const { toast } = useToast();
-  const { updateCategory } = useCategoriesStore();
+  const { mutateAsync: updateCategory } = useUpdateCategory();
   const { mutateAsync: addCategory } = useCreateCategory();
   const { mutateAsync: deleteCategory } = useDeleteCategory();
   const { data: categories } = useCategories();
-  const { projects } = useProjectsStore();
+  const { data: projects } = useProjects();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null
   );
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [categoryToEdit, setCategoryToEdit] = useState<string | null>(null);
+  const [categoryToEdit, setCategoryToEdit] = useState<Category | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const filteredCategories = categories?.filter((category) =>
@@ -40,8 +40,9 @@ export default function CategoriesPage() {
   );
 
   const getCategoryUsageCount = (category: string) => {
-    return projects.filter((project) => project.categories.includes(category))
-      .length;
+    return (projects ?? []).filter((project) =>
+      project.categories.includes(category)
+    ).length;
   };
 
   const handleDeleteClick = (category: Category) => {
@@ -61,7 +62,7 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleEditClick = (category: string) => {
+  const handleEditClick = (category: Category) => {
     setCategoryToEdit(category);
     setEditDialogOpen(true);
   };
@@ -81,7 +82,10 @@ export default function CategoriesPage() {
       return;
     }
 
-    updateCategory(oldCategory, newCategory);
+    updateCategory({
+      name: newCategory,
+      id: categoryToEdit!.id,
+    });
     toast({
       title: "Category updated",
       description: `"${oldCategory}" has been renamed to "${newCategory}".`,
@@ -161,7 +165,7 @@ export default function CategoriesPage() {
       <EditItemDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        itemName={categoryToEdit}
+        item={categoryToEdit}
         itemType="category"
         onSave={handleEditSave}
       />

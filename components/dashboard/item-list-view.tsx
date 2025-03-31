@@ -30,7 +30,7 @@ interface ItemListViewProps {
   searchTerm: string;
   itemType: "category" | "tag";
   getUsageCount: (item: string) => number;
-  onEditClick: (item: string) => void;
+  onEditClick: (item: Category) => void;
   onDeleteClick: (category: Category) => void;
   onAddClick: () => void;
 }
@@ -82,7 +82,7 @@ export function ItemListView({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditClick(item.id)}>
+                      <DropdownMenuItem onClick={() => onEditClick(item)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>

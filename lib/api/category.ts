@@ -17,6 +17,13 @@ export class Category {
     await this.axios.post("/category", { name });
   }
 
+  async updateCategory(
+    newCategory: string,
+    id: string
+  ): Promise<void> {
+    await this.axios.put(`/category/${id}`, { name: newCategory });
+  }
+
   async deleteCategory(id: string): Promise<void> {
     await this.axios.delete(`/category/${id}`);
   }
