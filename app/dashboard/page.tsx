@@ -10,16 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FolderKanban, Tag, BarChart3, TrendingUp, Clock } from "lucide-react";
-import { useProjectsStore } from "@/lib/stores/use-projects-store";
-import { useCategoriesStore } from "@/lib/stores/use-categories-store";
-import { useTagsStore } from "@/lib/stores/use-tags-store";
 import { useProjects } from "@/hooks/project.hooks";
 import { useCategories } from "@/hooks/category.hooks";
 
 export default function DashboardPage() {
   const { data: projects } = useProjects();
   const { data: categories } = useCategories();
-  const { tags } = useTagsStore();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -71,18 +67,6 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">{categories?.length ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               Used for project organization
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tags</CardTitle>
-            <Tag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tags.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Used for project filtering
             </p>
           </CardContent>
         </Card>
